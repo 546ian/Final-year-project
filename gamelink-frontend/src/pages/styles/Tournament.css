@@ -1,0 +1,156 @@
+/* Team Roster CSS */
+.team-roster-page {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+/* Tournament CSS */
+.host-tournament-page {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #fff;
+}
+
+.tournament-form {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tournament-form input, .tournament-form textarea, .tournament-form select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.tournament-form button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.tournament-bracket {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bracket-container {
+  display: grid;
+  gap: 15px;
+  margin: 30px 0;
+}
+
+.match {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.player {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vs {
+  padding: 8px;
+  background: rgba(255, 107, 107, 0.2);
+  text-align: center;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+/* Business Logs CSS */
+.business-logs-page {
+  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #fff;
+}
+
+.filter-options {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.filter-options button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-options button.active {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  border-color: transparent;
+}
+
+.logs-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.log-item {
+  padding: 15px;
+  border-left: 3px solid #ffa500;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+.log-date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+.ads-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.ads-section button {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Activities CSS */
+.activities-page h1 {
+  color: #ffa500;
+  margin-bottom: 30px;
+}
