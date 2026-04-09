@@ -30,6 +30,8 @@ psql -U postgres
 CREATE DATABASE gamelink;
 \q
 
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres -d gamelink -f "C:\Users\iannd\OneDrive\Year 4 sem 2\Project II\Final-year-project\gamelink-database\schema.sql"
+
 # Load schema
 psql -U postgres -d gamelink -f gamelink-database/schema.sql
 ```

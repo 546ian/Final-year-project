@@ -7,10 +7,361 @@
 
 /* Tournament CSS */
 .host-tournament-page {
-  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  background: #050505;
   min-height: 100vh;
-  padding: 40px 20px;
+  padding: 24px;
   color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(90deg, #e45f19 0%, #ff6b00 25%, #ffffff 100%);
+  padding: 18px 24px;
+  border-radius: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 24px 60px rgba(255, 105, 0, 0.14);
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+}
+
+.welcome-block {
+  display: flex;
+  flex-direction: column;
+  margin-left: 14px;
+}
+
+.welcome-label {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.welcome-name {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.topbar-center {
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.top-tab {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 12px 22px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.top-tab:hover,
+.top-tab.active {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.topbar-right img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.avatar-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.gamer-tag-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+}
+
+.registered-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.registered-items li {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.panel-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin: 14px 0 8px;
+}
+
+.fee-toggle,
+.radio-group,
+.format-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fee-toggle button,
+.radio-group label,
+.format-options label {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.fee-toggle button.active-toggle,
+.radio-group input:checked + span,
+.format-options input:checked + span {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  color: #111111;
+  border-color: transparent;
+}
+
+.radio-group label,
+.format-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-group input,
+.format-options input {
+  accent-color: #ff8c00;
+}
+
+.host-avatar-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.host-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.host-heading-row h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  color: #ff8c00;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.host-badge {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ffbd66;
+  font-weight: 700;
+}
+
+.host-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.host-panel {
+  background: #0b0b0b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+}
+
+.panel-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ff9c2b;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  margin-bottom: 18px;
+}
+
+.panel-section {
+  display: grid;
+  gap: 16px;
+}
+
+.host-panel input,
+.host-panel textarea,
+.host-panel select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.host-panel textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.two-column-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fee-toggle,
+.radio-group,
+.format-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fee-toggle button,
+.radio-group label,
+.format-options label {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.fee-toggle button.active-toggle,
+.radio-group input:checked + span,
+.format-options input:checked + span {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  color: #111111;
+  border-color: transparent;
+}
+
+.radio-group label,
+.format-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-group input,
+.format-options input {
+  accent-color: #ff8c00;
+}
+
+.subsection-title {
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+
+.add-participants-button,
+.start-tournament-button,
+.submit-tag-button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.add-participants-button,
+.submit-tag-button {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  color: #111111;
+}
+
+.start-tournament-button {
+  width: 100%;
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  color: #111111;
+  margin-top: 18px;
+}
+
+.gamer-tag-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+}
+
+.registered-list {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.registered-title {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.registered-placeholder {
+  min-height: 80px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 1100px) {
+  .host-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .host-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .host-tabs {
+    justify-content: flex-start;
+  }
+
+  .two-column-row,
+  .gamer-tag-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tournament-form {

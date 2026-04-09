@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import { businessAPI, activityAPI } from '../utils/api';
+import LoadingScreen from '../components/LoadingScreen';
 import './styles/BusinessHome.css';
 
 export default function BusinessHomePage() {
@@ -28,7 +29,7 @@ export default function BusinessHomePage() {
     }
   };
 
-  if (!businessInfo) return <div>Loading...</div>;
+  if (!businessInfo) return <LoadingScreen />;
 
   return (
     <div className="business-home">

@@ -1,0 +1,33 @@
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050505;
+  padding: 24px;
+}
+
+.loading-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(320px, 100%);
+}
+
+.loading-logo {
+  width: 100%;
+  max-width: 320px;
+  animation: fadeInOut 1.6s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

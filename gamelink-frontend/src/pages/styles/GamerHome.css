@@ -1,91 +1,292 @@
 /* Gamer Home Page CSS */
 .gamer-home {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
-  color: #fff;
-  padding: 20px;
+  background: #050505;
+  color: #ffffff;
+  padding: 18px;
+  font-family: 'Inter', sans-serif;
 }
 
-.header {
-  background: rgba(255, 107, 107, 0.1);
-  padding: 30px;
-  border-radius: 15px;
-  margin-bottom: 30px;
-  border-left: 5px solid #ff6b6b;
-}
-
-.header h1 {
-  font-size: 2.5em;
-  margin-bottom: 15px;
-}
-
-.stats {
+.topbar {
   display: flex;
-  gap: 20px;
-  font-size: 1.1em;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(90deg, #E45F19 0%, #ff6b00 25%, #ffffff 100%);
+  padding: 18px 24px;
+  border-radius: 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 24px 60px rgba(255, 105, 0, 0.14);
 }
 
-.stats span {
-  background: rgba(255, 107, 107, 0.3);
-  padding: 8px 15px;
-  border-radius: 20px;
-}
-
-.sections {
-  display: grid;
-  gap: 30px;
-}
-
-section {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 25px;
-  backdrop-filter: blur(10px);
-}
-
-section h2 {
-  margin-bottom: 20px;
-  color: #ffa500;
-}
-
-section button {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-.takeons-list, .tournaments-list, .posts-list {
-  display: grid;
-  gap: 15px;
-}
-
-.takeon-card, .tournament-card, .post-card {
-  background: rgba(255, 255, 255, 0.08);
-  padding: 15px;
-  border-radius: 10px;
-  border-left: 3px solid #ffa500;
-}
-
-.tournament-actions {
+.topbar-left,
+.topbar-right {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  align-items: center;
+  min-width: 80px;
 }
 
-.tournament-actions button {
+.welcome-block {
+  display: flex;
+  flex-direction: column;
+  margin-left: 14px;
+}
+
+.welcome-label {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.welcome-name {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.avatar-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.topbar-center {
+  display: flex;
+  gap: 36px;
+  justify-content: center;
   flex: 1;
 }
 
-.progress-section {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 25px;
-  backdrop-filter: blur(10px);
+.top-tab {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: #ffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 12px 18px;
+  overflow: hidden;
+}
+
+.top-tab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ffff;
+  border-radius: 999px;
+  transform: scale(0.6);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease, background 0.35s ease;
+}
+
+.top-tab:hover::after,
+.top-tab:focus::after {
+  transform: scale(1);
+  opacity: 1;
+  background: #ffffff00;
+}
+
+.topbar-right img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 24px;
+}
+
+.dashboard-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card {
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ff9c2b;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+.center-header {
+  justify-content: right;
+}
+
+.badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: #0e0e0e;
+  color: #8cff8c;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.card-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  margin-bottom: 18px;
+}
+
+.card-section-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+}
+
+.series-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.series-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+}
+
+.series-option input {
+  accent-color: #ff8c00;
+}
+
+.primary-button,
+.secondary-button,
+.tournament-item,
+.tournament-action {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.primary-button {
+  background: #ff6b00;
+  color: #ffffff;
+  margin-top: 12px;
+}
+
+.secondary-button {
+  background: #151515;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  margin-top: 14px;
+}
+
+.secondary-button.outline {
+  background: transparent;
+  border: 1px solid #ff8c00;
+  color: #ff8c00;
+}
+
+.rival-input {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+.rival-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.tournament-item,
+.tournament-action {
+  text-align: left;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #0000 23%, #E58314 80%, #ffffff 100%);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.posts-preview {
+  width: 100%;
+  border-radius: 20px;
+  background: #242424;
+}
+
+.posts-preview.large {
+  height: 220px;
+  margin-bottom: 18px;
+}
+
+.posts-preview.medium {
+  height: 140px;
+  margin-bottom: 18px;
+}
+
+.post-lines {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.post-lines div {
+  height: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+}
+
+.team-details p {
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+}
+
+.progress-wrapper {
+  width: 100%;
+  min-height: 240px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-center {
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-column {
+    gap: 18px;
+  }
 }

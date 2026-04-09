@@ -1,6 +1,20 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/authMiddleware');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/\s+/g, '-');
+    cb(null, `${Date.now()}-${safeName}`);
+  }
+});
+
+const upload = multer({ storage });
 
 const router = express.Router();
 
@@ -23,6 +37,21 @@ router.get('/feed', async (req, res) => {
   }
 });
 
+// Upload post media
+router.post('/upload', authMiddleware, upload.single('media'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No media file uploaded' });
+    }
+
+    const mediaUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    res.status(201).json({ mediaUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to upload media' });
+  }
+});
+
 // Create post
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -39,6 +68,25 @@ router.post('/', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to create post' });
+  }
+});
+
+// Delete post
+router.delete('/:postId', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM posts WHERE id = $1 AND user_id = $2 RETURNING *',
+      [req.params.postId, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Post not found or not authorized' });
+    }
+
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete post' });
   }
 });
 
@@ -75,6 +123,31 @@ router.post('/:postId/comments', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to add comment' });
+  }
+});
+
+// Edit comment
+router.put('/:postId/comments/:commentId', authMiddleware, async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    const result = await pool.query(
+      `UPDATE comments
+       SET content = $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2 AND user_id = $3 AND post_id = $4
+       RETURNING *`,
+      [content, req.params.commentId, req.user.id, req.params.postId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Comment not found or not authorized' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to edit comment' });
   }
 });
 

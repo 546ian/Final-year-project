@@ -3,24 +3,23 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  baseURL: API_BASE_URL
 });
 
-// Add token to requests
+// Add token to requests and preserve multipart form data
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (!(config.data instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json';
+  }
   return config;
 });
 
 export const authAPI = {
-  register: (username, email, password, accountType) =>
-    api.post('/auth/register', { username, email, password, account_type: accountType }),
+  register: (data) => api.post('/auth/register', data),
   login: (email, password) =>
     api.post('/auth/login', { email, password })
 };
@@ -28,6 +27,7 @@ export const authAPI = {
 export const gamerAPI = {
   getProfile: (userId) => api.get(`/gamers/${userId}`),
   updateProfile: (userId, data) => api.put(`/gamers/${userId}`, data),
+  deleteProfile: (userId, data) => api.delete(`/gamers/${userId}`, { data }),
   getStats: (userId) => api.get(`/gamers/${userId}/stats`),
   getProgress: (userId) => api.get(`/gamers/${userId}/progress`),
   getTournaments: (userId) => api.get(`/gamers/${userId}/tournaments`)
@@ -66,8 +66,11 @@ export const pvpAPI = {
 export const postAPI = {
   getFeed: () => api.get('/posts/feed'),
   create: (data) => api.post('/posts', data),
+  uploadMedia: (formData) => api.post('/posts/upload', formData),
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
   addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
+  editComment: (postId, commentId, content) => api.put(`/posts/${postId}/comments/${commentId}`, { content }),
+  deletePost: (postId) => api.delete(`/posts/${postId}`),
   like: (postId) => api.post(`/posts/${postId}/like`),
   unlike: (postId) => api.delete(`/posts/${postId}/like`)
 };

@@ -9,7 +9,20 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, account_type } = req.body;
+    const {
+      username,
+      email,
+      password,
+      account_type,
+      first_name,
+      last_name,
+      phone_number,
+      business_name,
+      description,
+      owner_name,
+      location,
+      address
+    } = req.body;
 
     if (!['gamer', 'business'].includes(account_type)) {
       return res.status(400).json({ error: 'Invalid account type' });
@@ -35,20 +48,20 @@ router.post('/register', async (req, res) => {
     // Create profile based on account type
     if (account_type === 'gamer') {
       await pool.query(
-        'INSERT INTO gamer_profiles (user_id) VALUES ($1)',
-        [userId]
+        'INSERT INTO gamer_profiles (user_id, first_name, last_name, phone_number) VALUES ($1, $2, $3, $4)',
+        [userId, first_name || null, last_name || null, phone_number || null]
       );
     } else if (account_type === 'business') {
       await pool.query(
-        'INSERT INTO business_profiles (user_id) VALUES ($1)',
-        [userId]
+        'INSERT INTO business_profiles (user_id, business_name, description, owner_name, phone_number, location, address) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [userId, business_name || username, description || null, owner_name || null, phone_number || null, location || null, address || null]
       );
     }
 
     res.status(201).json({ message: 'User registered successfully', userId });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ error: error.message || 'Registration failed' });
   }
 });
 
@@ -57,7 +70,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const userResult = await pool.query(
+      'SELECT * FROM users WHERE email = $1 OR username = $1',
+      [email]
+    );
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -70,12 +86,20 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, account_type: user.account_type },
+      { id: user.id, email: user.email, username: user.username, account_type: user.account_type },
       config.jwt_secret,
       { expiresIn: config.jwt_expiry }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, account_type: user.account_type } });
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        account_type: user.account_type
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Login failed' });
