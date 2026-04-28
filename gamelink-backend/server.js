@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+
 const authRoutes = require('./routes/auth');
 const gamerRoutes = require('./routes/gamers');
 const businessRoutes = require('./routes/businesses');
@@ -11,6 +12,7 @@ const activityRoutes = require('./routes/activities');
 const pvpRoutes = require('./routes/pvp');
 const postRoutes = require('./routes/posts');
 const paymentRoutes = require('./routes/payments');
+const gameRoutes = require('./routes/games'); 
 
 dotenv.config();
 
@@ -36,6 +38,7 @@ app.use('/api/activities', activityRoutes);
 app.use('/api/pvp', pvpRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/games', gameRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -49,6 +52,26 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+// Test DB connection on startup
+const pool = require('./config/database');
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ DB Connection failed:', err.stack);
+  } else {
+    console.log('✅ DB Connected successfully');
+    console.log('🔍 Checking users table...');
+    client.query('SELECT COUNT(*) FROM users', (err, res) => {
+      if (err) {
+        console.error('⚠️  Users table query failed:', err);
+      } else {
+        console.log(`📈 Users table: ${res.rows[0].count} users exist`);
+      }
+      release();
+    });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`✅ Health check: http://localhost:${PORT}/api/health`);
 });

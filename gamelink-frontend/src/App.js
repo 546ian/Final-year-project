@@ -16,8 +16,10 @@ import TeamRosterPage from './pages/TeamRosterPage';
 import GamerProfilePage from './pages/GamerProfilePage';
 import GamerActivitiesPage from './pages/GamerActivitiesPage';
 import BusinessLogsPage from './pages/BusinessLogsPage';
+import TournamentViewPage from './pages/TournamentViewPage';
 
 import './App.css';
+
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuth();
@@ -39,7 +41,9 @@ function AppContent() {
         <Route path="/host-tournament" element={<PrivateRoute><HostTournamentPage /></PrivateRoute>} />
         <Route path="/host-tournament/gamer" element={<PrivateRoute><GamerHostTournamentPage /></PrivateRoute>} />
         <Route path="/host-tournament/business" element={<PrivateRoute><BusinessHostTournamentPage /></PrivateRoute>} />
+        <Route path="/tournament/:id" element={<PrivateRoute><TournamentViewPage /></PrivateRoute>} />
         <Route path="/team-roster" element={<PrivateRoute><TeamRosterPage /></PrivateRoute>} />
+
         <Route path="/business-logs" element={<PrivateRoute><BusinessLogsPage /></PrivateRoute>} />
 
         {/* Gamer Routes */}

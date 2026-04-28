@@ -27,10 +27,12 @@ export const authAPI = {
 export const gamerAPI = {
   getProfile: (userId) => api.get(`/gamers/${userId}`),
   updateProfile: (userId, data) => api.put(`/gamers/${userId}`, data),
+  updateAvatar: (userId, data) => api.put(`/gamers/${userId}/avatar`, data),
   deleteProfile: (userId, data) => api.delete(`/gamers/${userId}`, { data }),
   getStats: (userId) => api.get(`/gamers/${userId}/stats`),
   getProgress: (userId) => api.get(`/gamers/${userId}/progress`),
-  getTournaments: (userId) => api.get(`/gamers/${userId}/tournaments`)
+  getTournaments: (userId) => api.get(`/gamers/${userId}/tournaments`),
+  getHostedTournaments: (userId) => api.get(`/gamers/${userId}/hosted-tournaments`)
 };
 
 export const businessAPI = {
@@ -47,6 +49,7 @@ export const tournamentAPI = {
   create: (data) => api.post('/tournaments', data),
   register: (tournamentId) => api.post(`/tournaments/${tournamentId}/register`),
   getParticipants: (tournamentId) => api.get(`/tournaments/${tournamentId}/participants`),
+  getBracket: (tournamentId) => api.get(`/tournaments/${tournamentId}/bracket`),
   start: (tournamentId) => api.post(`/tournaments/${tournamentId}/start`)
 };
 
@@ -81,4 +84,10 @@ export const paymentAPI = {
   getHistory: () => api.get('/payments')
 };
 
+export const gameAPI = {
+  getAll: () => api.get('/games'),
+  getById: (gameId) => api.get(`/games/${gameId}`)
+};
+
 export default api;
+

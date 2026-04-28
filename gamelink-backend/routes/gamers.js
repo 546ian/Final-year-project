@@ -1,7 +1,22 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
 const pool = require('../config/database');
 const authMiddleware = require('../middleware/authMiddleware');
+
+const uploadsDir = path.join(__dirname, '../uploads');
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/\s+/g, '-');
+    cb(null, `${Date.now()}-${safeName}`);
+  }
+});
+
+const avatarUpload = multer({ storage: avatarStorage });
 
 const router = express.Router();
 
@@ -104,6 +119,59 @@ router.put('/:userId', authMiddleware, async (req, res) => {
   }
 });
 
+const uploadAvatarMiddleware = (req, res, next) => {
+  if (req.is('multipart/form-data')) {
+    return avatarUpload.single('avatar')(req, res, next);
+  }
+  return next();
+};
+
+// Update gamer avatar without requiring current password
+router.put('/:userId/avatar', authMiddleware, uploadAvatarMiddleware, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+
+    if (req.user.id !== userId) {
+      return res.status(403).json({ error: 'You may only update your own avatar' });
+    }
+
+    let avatarUrl = null;
+    if (req.file) {
+      avatarUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    } else if (Object.prototype.hasOwnProperty.call(req.body, 'avatar_url')) {
+      avatarUrl = req.body.avatar_url;
+    } else {
+      return res.status(400).json({ error: 'No avatar data provided' });
+    }
+
+    const result = await pool.query(
+      `UPDATE gamer_profiles
+       SET avatar_url = $1,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE user_id = $2
+       RETURNING *`,
+      [avatarUrl, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Gamer profile not found' });
+    }
+
+    const profileResult = await pool.query(
+      `SELECT gp.*, u.email, u.username
+       FROM gamer_profiles gp
+       JOIN users u ON gp.user_id = u.id
+       WHERE gp.user_id = $1`,
+      [userId]
+    );
+
+    res.json(profileResult.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update avatar' });
+  }
+});
+
 // Delete gamer account
 router.delete('/:userId', authMiddleware, async (req, res) => {
   try {
@@ -188,6 +256,25 @@ router.get('/:userId/tournaments', authMiddleware, async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch tournaments' });
+  }
+});
+
+// Get tournaments hosted by this gamer
+router.get('/:userId/hosted-tournaments', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT t.*, COALESCE(bp.business_name, u.username) as host_name
+       FROM tournaments t
+       LEFT JOIN business_profiles bp ON t.host_business_id = bp.id
+       LEFT JOIN gamer_profiles gp ON t.host_gamer_id = gp.id
+       LEFT JOIN users u ON gp.user_id = u.id
+       WHERE t.host_gamer_id = (SELECT id FROM gamer_profiles WHERE user_id = $1)
+       ORDER BY t.start_date DESC`,
+      [req.params.userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch hosted tournaments' });
   }
 });
 

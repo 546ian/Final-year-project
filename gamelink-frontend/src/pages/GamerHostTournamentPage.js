@@ -1,82 +1,188 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../utils/AuthContext';
-import logo from '../Assets/logo.png';
-import './styles/Tournament.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../utils/AuthContext";
+import { gamerAPI, tournamentAPI, gameAPI } from "../utils/api";
+import AvatarPicker from "../components/AvatarPicker";
+import logo from "../Assets/logo.png";
+import "./styles/Tournament.css";
 
 export default function GamerHostTournamentPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
-    tournament_name: '',
-    description: '',
-    game_id: '',
-    stage_type: 'double',
-    tournament_format: 'single_elimination',
-    max_players: 4,
-    entry_fee: 0,
-    entry_fee_type: 'free',
-    prize_money: '',
-    start_date: '',
-    start_time: '',
-    url: '',
-    gamer_tag: '',
-    registration_type: 'manual',
-    group_stage: '',
-    final_stage: '',
-    gamers_face: '',
-    rank_by: '',
-    group_participants: 4,
-    advanced_participants: 0,
-    invited_rivals: [],
-    rival_tag: ''
+    tournament_name: "",
+    description: "",
+    game: "",
+    tournament_format: "single_elimination",
+    max_players: 2,
+    start_date: "",
+    start_time: "",
+    stream_url: "",
+    prize_pool: "",
+    participants: [],
+    registration_open: true,
+    rival_tag: "",
   });
+  const [invited_rivals, setInvitedRivals] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
-  const handleToggle = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value
-    });
-  };
-
-  const handleAddRival = () => {
+  const handleAddParticipant = () => {
     const rival = formData.rival_tag.trim();
     if (!rival) return;
+    if (formData.participants.length >= formData.max_players) {
+      alert("Max players reached");
+      return;
+    }
 
     setFormData({
       ...formData,
-      invited_rivals: [...formData.invited_rivals, rival],
-      rival_tag: ''
+      participants: [...formData.participants, rival],
+      rival_tag: "",
     });
   };
 
-  const handleCreateTournament = () => {
-    alert('Gamer tournament preview created.');
+  const handleCreateTournament = async () => {
+    // Validation: Check required fields
+    if (!formData.tournament_name || !formData.tournament_name.trim()) {
+      alert('Tournament name is required');
+      return;
+    }
+    if (!formData.game || formData.game === '') {
+      alert('Please select a game');
+      return;
+    }
+    if (!formData.start_date || !formData.start_time) {
+      alert('Start date and time are required');
+      return;
+    }
+    if (formData.max_players < 2) {
+      alert('Tournament must have at least 2 players');
+      return;
+    }
+    // Validate game_id exists in available games
+    const selectedGame = availableGames.find(
+      (game) => game.id === parseInt(formData.game)
+    );
+    if (!selectedGame) {
+      alert('Invalid game selection');
+      return;
+    }
+    try {
+      const tournamentData = {
+        tournament_name: formData.tournament_name.trim(),
+        description: formData.description || '',
+        game_id: parseInt(formData.game), 
+        tournament_format: formData.tournament_format,
+        max_players: parseInt(formData.max_players),
+        entry_fee: parseFloat(formData.entry_fee) || 0,
+        start_date: `${formData.start_date}T${formData.start_time}:00`,
+        host_type: "gamer",
+      };
+      // Validate date is in the future
+      const startDateTime = new Date(tournamentData.start_date);
+      if (startDateTime <= new Date()) {
+        alert('Tournament start date must be in the future');
+        return;
+      }
+      const response = await tournamentAPI.create(tournamentData);
+      
+      if (response.data && response.data.id) {
+        alert('Tournament created successfully!');
+        navigate(`/tournament/${response.data.id}`);
+      } else {
+        alert('Tournament created but response was unexpected');
+      }
+    } catch (error) {
+      console.error("Failed to create tournament:", error);
+      const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
+      alert(`Failed to create tournament: ${errorMsg}`);
+    }
   };
+
+
+  const handleSaveAvatar = async (avatarUrl) => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, {
+        avatar_url: avatarUrl,
+      });
+      updateUser({ avatarUrl: response.data.avatar_url });
+    } catch (error) {
+      console.error("Failed to save avatar:", error);
+      alert("Unable to save avatar. Please try again.");
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, {
+        avatar_url: null,
+      });
+      updateUser({ avatarUrl: response.data.avatar_url });
+    } catch (error) {
+      console.error("Failed to delete avatar:", error);
+      alert("Unable to delete avatar. Please try again.");
+    }
+  };
+
+  const [availableGames, setAvailableGames] = useState([]);
+  useEffect(() => {
+  const loadGames = async () => {
+    try {
+      const response = await gameAPI.getAll();
+      setAvailableGames(response.data);
+    } catch (error) {
+      console.error('Failed to load games:', error);
+    }
+  };
+  loadGames();
+}, []);
 
   return (
     <div className="host-tournament-page">
       <div className="topbar">
         <div className="topbar-left">
-          <div className="avatar-circle" />
+          <AvatarPicker
+            avatarUrl={user?.avatarUrl}
+            onSave={handleSaveAvatar}
+            onDelete={handleDeleteAvatar}
+          />
           <div className="welcome-block">
             <p className="welcome-label">Host</p>
-            <p className="welcome-name">{user?.username || 'Gamer'}</p>
+            <p className="welcome-name">{user?.username || "Gamer"}</p>
           </div>
         </div>
 
         <div className="topbar-center">
-          <button className="top-tab" type="button" onClick={() => navigate('/profile')}>Profile</button>
-          <button className="top-tab active" type="button" onClick={() => navigate('/gamer-home')}>Home</button>
-          <button className="top-tab" type="button" onClick={() => navigate('/activities')}>Activities</button>
+          <button
+            className="top-tab"
+            type="button"
+            onClick={() => navigate("/profile")}
+          >
+            Profile
+          </button>
+          <button
+            className="top-tab active"
+            type="button"
+            onClick={() => navigate("/gamer-home")}
+          >
+            Home
+          </button>
+          <button
+            className="top-tab"
+            type="button"
+            onClick={() => navigate("/activities")}
+          >
+            Activities
+          </button>
         </div>
 
         <div className="topbar-right">
@@ -85,27 +191,40 @@ export default function GamerHostTournamentPage() {
       </div>
 
       <div className="host-heading-row">
-        <h1>Gamer Host</h1>
-        <div className="host-badge">Match Setup</div>
+        <h1>Create Tournament</h1>
+        <div className="host-badge">Quick Setup</div>
       </div>
 
       <div className="host-grid">
         <section className="host-panel">
-          <div className="panel-title">Tournament details</div>
-          <div className="panel-subtitle">Primary info</div>
+          <div className="panel-title">Basics</div>
           <div className="panel-section">
             <input
               type="text"
               name="tournament_name"
-              placeholder="Tournament name"
+              placeholder="Tournament Name"
               value={formData.tournament_name}
               onChange={handleChange}
             />
+            <select
+              name="game"
+              value={formData.game}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a game</option>
+              {availableGames.map((game) => (
+                <option key={game.id} value={game.id}>
+                  {game.name}
+                </option>
+              ))}
+            </select>
             <textarea
               name="description"
-              placeholder="Description"
+              placeholder="Description (optional)"
               value={formData.description}
               onChange={handleChange}
+              rows="3"
             />
             <div className="two-column-row">
               <input
@@ -121,190 +240,108 @@ export default function GamerHostTournamentPage() {
                 onChange={handleChange}
               />
             </div>
-            <input
-              type="text"
-              name="url"
-              placeholder="URL / stream link"
-              value={formData.url}
-              onChange={handleChange}
-            />
-            <div className="panel-subtitle">Tournament fee</div>
-            <div className="fee-toggle">
-              <button
-                type="button"
-                className={formData.entry_fee_type === 'free' ? 'active-toggle' : ''}
-                onClick={() => handleToggle('entry_fee_type', 'free')}
-              >
-                Free
-              </button>
-              <button
-                type="button"
-                className={formData.entry_fee_type === 'paid' ? 'active-toggle' : ''}
-                onClick={() => handleToggle('entry_fee_type', 'paid')}
-              >
-                Paid
-              </button>
-            </div>
-            <input
-              type="text"
-              name="prize_money"
-              placeholder="Prize money"
-              value={formData.prize_money}
-              onChange={handleChange}
-            />
           </div>
         </section>
 
         <section className="host-panel">
-          <div className="panel-title">Game info</div>
-          <div className="panel-subtitle">Select game</div>
+          <div className="panel-title">Format</div>
           <div className="panel-section">
-            <input
-              type="text"
-              name="game_id"
-              placeholder="Search game"
-              value={formData.game_id}
+            <select
+              name="tournament_format"
+              value={formData.tournament_format}
               onChange={handleChange}
-            />
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="stage_type"
-                  value="single"
-                  checked={formData.stage_type === 'single'}
-                  onChange={handleChange}
-                />
-                <span>Single</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="stage_type"
-                  value="double"
-                  checked={formData.stage_type === 'double'}
-                  onChange={handleChange}
-                />
-                <span>Double (groups compete separately)</span>
-              </label>
-            </div>
-            <div className="panel-subtitle">Double</div>
-            <div className="two-column-row">
-              <input
-                type="text"
-                name="group_stage"
-                placeholder="Group stage"
-                value={formData.group_stage}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="final_stage"
-                placeholder="Final stage"
-                value={formData.final_stage}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="two-column-row">
-              <input
-                type="text"
-                name="gamers_face"
-                placeholder="Gamers face"
-                value={formData.gamers_face}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
-                name="rank_by"
-                placeholder="Rank by"
-                value={formData.rank_by}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="two-column-row">
-              <input
-                type="number"
-                name="group_participants"
-                placeholder="Group participants"
-                value={formData.group_participants}
-                onChange={handleChange}
-              />
-              <input
-                type="number"
-                name="advanced_participants"
-                placeholder="Advanced participants"
-                value={formData.advanced_participants}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="host-panel">
-          <div className="panel-title">Registration</div>
-          <div className="panel-section">
+            >
+              <option value="single_elimination">Single Elimination</option>
+              <option value="double_elimination">Double Elimination</option>
+              <option value="round_robin">Round Robin</option>
+            </select>
             <input
               type="number"
               name="max_players"
-              placeholder="Max number of participants"
+              placeholder="Max Players (8, 16, 32)"
               value={formData.max_players}
               onChange={handleChange}
+              min="2"
             />
-            <div className="panel-subtitle">Registration type</div>
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="registration_type"
-                  value="manual"
-                  checked={formData.registration_type === 'manual'}
-                  onChange={handleChange}
-                />
-                <span>Manual</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="registration_type"
-                  value="signup"
-                  checked={formData.registration_type === 'signup'}
-                  onChange={handleChange}
-                />
-                <span>Sign-up</span>
-              </label>
+            <div className="fee-toggle">
+              <button
+                type="button"
+                className={!formData.entry_fee ? "active-toggle" : ""}
+                onClick={() => setFormData({ ...formData, entry_fee: 0 })}
+              >
+                Free
+              </button>
             </div>
-            <button className="add-participants-button" type="button" onClick={() => alert('Add participants placeholder')}>
-              + Add Participants
-            </button>
+            <input
+              type="text"
+              name="prize_pool"
+              placeholder="Prize Pool"
+              value={formData.prize_pool}
+              onChange={handleChange}
+            />
+          </div>
+        </section>
+
+        <section className="host-panel">
+          <div className="panel-title">Players & Registration</div>
+          <div className="panel-section">
             <div className="gamer-tag-row">
               <input
                 type="text"
-                name="rival_tag"
-                placeholder="Gamer tag"
+                placeholder="Add player username"
                 value={formData.rival_tag}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, rival_tag: e.target.value })
+                }
               />
-              <button className="submit-tag-button" type="button" onClick={handleAddRival}>
-                Submit
+              <button
+                className="submit-tag-button"
+                onClick={handleAddParticipant}
+                disabled={formData.participants.length >= formData.max_players}
+              >
+                {formData.participants.length >= formData.max_players
+                  ? "Limit Reached"
+                  : "Add"}
               </button>
             </div>
             <div className="registered-list">
-              <p className="registered-title">Registered participants:</p>
-              {formData.invited_rivals.length ? (
-                <ul className="registered-items">
-                  {formData.invited_rivals.map((tag, index) => (
-                    <li key={index}>{tag}</li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="registered-placeholder">No rivals added yet</div>
+              <p className="registered-title">
+                Seeded Players ({formData.participants.length}/
+                {formData.max_players}):
+              </p>
+              {formData.participants.map((player, index) => (
+                <li key={index} className="registered-items">
+                  {player}
+                </li>
+              ))}
+              {formData.participants.length === 0 && (
+                <div className="registered-placeholder">
+                  Add players here or open public registration
+                </div>
               )}
             </div>
-            <button className="start-tournament-button" type="button" onClick={handleCreateTournament}>
-              Start tournament
-            </button>
+            <input
+              type="url"
+              name="stream_url"
+              placeholder="Stream URL (optional)"
+              value={formData.stream_url}
+              onChange={handleChange}
+            />
           </div>
         </section>
+      </div>
+
+      <div
+        className="host-heading-row"
+        style={{ justifyContent: "flex-end", marginTop: "2rem" }}
+      >
+        <button
+          className="start-tournament-button"
+          style={{ maxWidth: "250px" }}
+          onClick={handleCreateTournament}
+        >
+          Create Tournament & View Bracket
+        </button>
       </div>
     </div>
   );

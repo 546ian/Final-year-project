@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -33,20 +34,29 @@ export default function LoginPage() {
         <h2 className="login-subheading">Login</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <input
+<input
             type="email"
             placeholder="Username or email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.trim())}
             required
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="password-field">
+<input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value.trim())}
+              required
+            />
+            <span
+              className="password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ cursor: 'pointer' }}
+            >
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </span>
+          </div>
           <button type="submit">Login</button>
         </form>
         <p className="register-link">Don't have an account? <a href="/register">Register here</a></p>

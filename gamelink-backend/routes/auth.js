@@ -71,8 +71,8 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     const userResult = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $1',
-      [email]
+      'SELECT * FROM users WHERE email = $1 OR username = $2',
+      [email, email]
     );
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -85,24 +85,42 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
+let avatarUrl = null;
+    console.log(`🎮 FETCHING AVATAR for ${user.account_type}`);
+    if (user.account_type === 'gamer') {
+      const profileResult = await pool.query(
+        'SELECT avatar_url FROM gamer_profiles WHERE user_id = $1',
+        [user.id]
+      );
+      console.log(`👤 GAMER PROFILE: found ${profileResult.rows.length}, avatar: ${profileResult.rows[0]?.avatar_url || 'none'}`);
+      if (profileResult.rows.length > 0) {
+        avatarUrl = profileResult.rows[0].avatar_url;
+      }
+    } else {
+      console.log('🏢 BUSINESS: no avatar fetch');
+    }
+
+const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username, account_type: user.account_type },
       config.jwt_secret,
       { expiresIn: config.jwt_expiry }
     );
 
+    console.log(`🎉 LOGIN SUCCESS: ${user.username} (${user.account_type}) token issued`);
+    
     res.json({
       token,
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
-        account_type: user.account_type
+        account_type: user.account_type,
+        avatarUrl
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('💥 LOGIN ERROR:', error);
+    res.status(500).json({ error: 'Login failed: ' + error.message });
   }
 });
 

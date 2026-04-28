@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
+import { tournamentAPI } from '../utils/api';
 import logo from '../Assets/logo.png';
 import './styles/Tournament.css';
 
@@ -12,9 +13,27 @@ export default function BusinessHostTournamentPage() {
   const [prizePool, setPrizePool] = useState('');
   const [audience, setAudience] = useState('');
 
-  const handleSubmit = () => {
-    alert('Business tournament published.');
+  const handleSubmit = async () => {
+    try {
+      const tournamentData = {
+        tournament_name: eventName || 'New Event',
+        description: `Venue: ${venue}, Audience: ${audience}, Prize: ${prizePool}`,
+        game_id: null,
+        tournament_format: 'single_elimination',
+        max_players: 16,
+        entry_fee: 0,
+        start_date: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
+        host_type: 'business'
+      };
+      const response = await tournamentAPI.create(tournamentData);
+      navigate(`/tournament/${response.data.id}`);
+    } catch (error) {
+      console.error('Failed to create tournament:', error);
+const errorMsg = error.response?.data?.error || error.message || 'Unknown error';
+      alert(`Failed to create tournament: ${errorMsg}`);
+    }
   };
+
 
   return (
     <div className="host-tournament-page">
@@ -98,3 +117,4 @@ export default function BusinessHostTournamentPage() {
     </div>
   );
 }
+

@@ -3,16 +3,39 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
 import { gamerAPI } from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
+import AvatarPicker from '../components/AvatarPicker';
 import logo from '../Assets/logo.png';
 import './styles/Profile.css';
 
 export default function GamerProfilePage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [passwordFields, setPasswordFields] = useState({ current_password: '', new_password: '' });
+
+  const handleSaveAvatar = async (avatarUrl) => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, { avatar_url: avatarUrl });
+      updateUser({ avatarUrl: response.data.avatar_url });
+    } catch (error) {
+      console.error('Failed to save avatar:', error);
+      alert('Unable to save avatar. Please try again.');
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, { avatar_url: null });
+      updateUser({ avatarUrl: response.data.avatar_url });
+    } catch (error) {
+      console.error('Failed to delete avatar:', error);
+      alert('Unable to delete avatar. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -90,7 +113,11 @@ export default function GamerProfilePage() {
     <div className="profile-page">
       <div className="topbar">
         <div className="topbar-left">
-          <div className="avatar-circle" />
+          <AvatarPicker
+            avatarUrl={user?.avatarUrl}
+            onSave={handleSaveAvatar}
+            onDelete={handleDeleteAvatar}
+          />
           <div className="welcome-block">
             <p className="welcome-label">Welcome</p>
             <p className="welcome-name">{gamerTag}</p>

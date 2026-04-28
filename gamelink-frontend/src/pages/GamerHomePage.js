@@ -1,61 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
-import { gamerAPI, pvpAPI, tournamentAPI, postAPI } from '../utils/api';
+import { gamerAPI, pvpAPI, tournamentAPI, postAPI, gameAPI } from '../utils/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import logo from '../Assets/logo.png';
 import LoadingScreen from '../components/LoadingScreen';
+import AvatarPicker from '../components/AvatarPicker';
 import './styles/GamerHome.css';
 
 export default function GamerHomePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [gamerInfo, setGamerInfo] = useState(null);
-  const [pvpTakeons, setPvpTakeons] = useState([]);
   const [tournaments, setTournaments] = useState([]);
-  const [posts, setPosts] = useState([]);
-  const [progressData, setProgressData] = useState([]);
+  const [registeredTournaments, setRegisteredTournaments] = useState([]);
+  const [hostedTournaments, setHostedTournaments] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showRegisterAssigned, setShowRegisterAssigned] = useState(false);
+  const [progressData, setProgressData] = useState([]);  
   const [series, setSeries] = useState('3');
   const [rivalName, setRivalName] = useState('');
+  const [availableGames, setAvailableGames] = useState([]);
+  const [selectedGameId, setSelectedGameId] = useState('');
 
-  useEffect(() => {
-    loadGamerData();
-  }, [user?.id]);
+  const handleSaveAvatar = async (formData) => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, formData);
+      const newAvatarUrl = response.data.avatar_url;
+      setGamerInfo(response.data);
+      updateUser({ avatarUrl: newAvatarUrl });
+    } catch (error) {
+      console.error('Failed to save avatar:', error);
+      alert('Unable to save avatar. Please try again.');
+    }
+  };
 
-  const loadGamerData = async () => {
+  const handleDeleteAvatar = async () => {
+    if (!user) return;
+    try {
+      const response = await gamerAPI.updateAvatar(user.id, { avatar_url: null });
+      const newAvatarUrl = response.data.avatar_url;
+      setGamerInfo(response.data);
+      updateUser({ avatarUrl: newAvatarUrl });
+    } catch (error) {
+      console.error('Failed to delete avatar:', error);
+      alert('Unable to delete avatar. Please try again.');
+    }
+  };
+
+  const loadGamerData = useCallback(async () => {
     try {
       if (user?.id) {
-        const [gamerRes, pvpRes, tourRes, postsRes, progRes] = await Promise.all([
+        const [gamerRes, , tourRes, , progRes, regRes, hostRes] = await Promise.all([
           gamerAPI.getProfile(user.id),
           pvpAPI.getAll(),
           tournamentAPI.getAll(),
           postAPI.getFeed(),
-          gamerAPI.getProgress(user.id)
+          gamerAPI.getProgress(user.id),
+          gamerAPI.getTournaments(user.id),
+          gamerAPI.getHostedTournaments(user.id)
         ]);
 
         setGamerInfo(gamerRes.data);
-        setPvpTakeons(pvpRes.data);
         setTournaments(tourRes.data);
-        setPosts(postsRes.data);
         setProgressData(progRes.data);
+        setRegisteredTournaments(regRes.data);
+        setHostedTournaments(hostRes.data);
       }
     } catch (error) {
       console.error('Failed to load gamer data:', error);
     }
-  };
+  }, [user?.id]);
 
-  const handleBeginChallenge = () => {
-    console.log('Begin challenge:', rivalName, series);
+  useEffect(() => {
+    loadGamerData();
+  }, [user?.id, loadGamerData]);
+
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        const response = await gameAPI.getAll();
+        setAvailableGames(response.data);
+      } catch (error) {
+        console.error('Failed to load games:', error);
+      }
+    };
+    loadGames();
+  }, []);
+
+  const handleBeginChallenge = async () => {
+    if (!selectedGameId || !rivalName.trim()) {
+      alert('Please select a game and enter rival name');
+      return;
+    }
+    try {
+      const challengeData = {
+        opponent_display_name: rivalName.trim(),
+        game_id: parseInt(selectedGameId)
+      };
+      console.log('Creating PVP challenge:', challengeData, series);
+      alert('Challenge sent to ' + rivalName + ' for ' + series + ' series in selected game!');
+      setRivalName('');
+      setSelectedGameId('');
+    } catch (error) {
+      console.error('Failed to create challenge:', error);
+      alert('Failed to send challenge');
+    }
   };
 
   if (!gamerInfo) return <LoadingScreen />;
+
+  const completedHosted = hostedTournaments.filter(t => t.status === 'completed');
+  const completedParticipated = registeredTournaments.filter(t => t.status === 'completed');
+  const activeRegistered = registeredTournaments.filter(t => t.status !== 'completed');
+  const registeredIds = new Set(registeredTournaments.map(t => t.id));
+  const availableTournaments = tournaments.filter(t => t.host_gamer_id !== gamerInfo.id && !registeredIds.has(t.id));
 
   return (
     <div className="gamer-home">
       <div className="topbar">
         <div className="topbar-left">
-          <div className="avatar-circle" />
+          <AvatarPicker
+            avatarUrl={gamerInfo?.avatar_url || user?.avatarUrl}
+            onSave={handleSaveAvatar}
+            onDelete={handleDeleteAvatar}
+          />
           <div className="welcome-block">
             <p className="welcome-label">Welcome</p>
             <p className="welcome-name">{user?.username || gamerInfo?.first_name || gamerInfo?.last_name || user?.email?.split('@')[0] || 'Gamer'}</p>
@@ -102,7 +173,19 @@ export default function GamerHomePage() {
                 </label>
               ))}
             </div>
-            <button className="secondary-button">Select game</button>
+            <select 
+              className="secondary-button" 
+              value={selectedGameId} 
+              onChange={(e) => setSelectedGameId(e.target.value)}
+              style={{width: '100%', marginBottom: '1rem'}}
+            >
+              <option value="">Select game</option>
+              {availableGames.map((game) => (
+                <option key={game.id} value={game.id}>
+                  {game.name}
+                </option>
+              ))}
+            </select>
             <input
               className="rival-input"
               type="text"
@@ -121,9 +204,95 @@ export default function GamerHomePage() {
             </div>
             <div className="card-separator" />
             <button className="tournament-action" onClick={() => navigate('/host-tournament')}>Host a tournament</button>
-            <button className="tournament-item">Ongoing tournament</button>
-            <button className="tournament-item">History</button>
-            <button className="tournament-item">Register/Assigned tournament</button>
+            <div className="tournament-item" style={{cursor: 'default'}}>Ongoing tournament</div>
+            {tournaments.filter(t => t.status === 'active').length === 0 ? (
+              <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No ongoing tournaments</div>
+            ) : (
+              tournaments.filter(t => t.status === 'active').map(t => (
+                <button 
+                  key={t.id} 
+                  className="tournament-item" 
+                  onClick={() => navigate('/tournament/' + t.id)}
+                  style={{textAlign: 'left'}}
+                >
+                  {t.tournament_name}
+                </button>
+              ))
+            )}
+            <button className="tournament-item" onClick={() => setShowHistory(prev => !prev)}>
+              {showHistory ? 'Hide History' : 'History'}
+            </button>
+            {showHistory && (
+              <div className="tournament-sublist">
+                <div className="sublist-title">Hosted by you</div>
+                {completedHosted.length === 0 ? (
+                  <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No hosted history</div>
+                ) : (
+                  completedHosted.map(t => (
+                    <button 
+                      key={t.id} 
+                      className="tournament-item" 
+                      onClick={() => navigate('/tournament/' + t.id)}
+                      style={{textAlign: 'left'}}
+                    >
+                      {t.tournament_name}
+                    </button>
+                  ))
+                )}
+                <div className="sublist-title">Participated in</div>
+                {completedParticipated.length === 0 ? (
+                  <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No participation history</div>
+                ) : (
+                  completedParticipated.map(t => (
+                    <button 
+                      key={t.id} 
+                      className="tournament-item" 
+                      onClick={() => navigate('/tournament/' + t.id)}
+                      style={{textAlign: 'left'}}
+                    >
+                      {t.tournament_name}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+            <button className="tournament-item" onClick={() => setShowRegisterAssigned(prev => !prev)}>
+              {showRegisterAssigned ? 'Hide Register/Assigned' : 'Register/Assigned tournament'}
+            </button>
+            {showRegisterAssigned && (
+              <div className="tournament-sublist">
+                <div className="sublist-title">Your assignments</div>
+                {activeRegistered.length === 0 ? (
+                  <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No assigned tournaments</div>
+                ) : (
+                  activeRegistered.map(t => (
+                    <button 
+                      key={t.id} 
+                      className="tournament-item" 
+                      onClick={() => navigate('/tournament/' + t.id)}
+                      style={{textAlign: 'left'}}
+                    >
+                      {t.tournament_name}
+                    </button>
+                  ))
+                )}
+                <div className="sublist-title">Available tournaments</div>
+                {availableTournaments.length === 0 ? (
+                  <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No available tournaments</div>
+                ) : (
+                  availableTournaments.map(t => (
+                    <button 
+                      key={t.id} 
+                      className="tournament-item" 
+                      onClick={() => navigate('/tournament/' + t.id)}
+                      style={{textAlign: 'left'}}
+                    >
+                      {t.tournament_name} <span style={{opacity: 0.7, fontSize: '0.8rem'}}>(Host: {t.host_name || 'Unknown'})</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -187,3 +356,4 @@ export default function GamerHomePage() {
     </div>
   );
 }
+

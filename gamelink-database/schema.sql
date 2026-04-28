@@ -18,7 +18,7 @@ CREATE TABLE gamer_profiles (
   user_id INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   first_name VARCHAR(50),
   last_name VARCHAR(50),
-  avatar_url VARCHAR(255),
+  avatar_url TEXT,
   phone_number VARCHAR(20),
   location VARCHAR(100),
   bio TEXT,
@@ -74,6 +74,13 @@ CREATE TABLE games (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO games (name, description, genre, platform) VALUES
+('Valorant', 'Tactical 5v5 shooter', 'FPS', 'PC'),
+('CS:GO', 'Counter-Strike Global Offensive', 'FPS', 'Multi'),
+('League of Legends', 'MOBA game', 'MOBA', 'PC'),
+('Dota 2', 'Defense of the Ancients 2', 'MOBA', 'PC'),
+('Fortnite', 'Battle Royale', 'Battle Royale', 'Multi');
+
 -- Business activities (manually monitored and remotely from consoles)
 CREATE TABLE activities (
   id SERIAL PRIMARY KEY,
@@ -116,7 +123,8 @@ CREATE TABLE team_members (
 -- Tournaments
 CREATE TABLE tournaments (
   id SERIAL PRIMARY KEY,
-  host_business_id INT NOT NULL REFERENCES business_profiles(id) ON DELETE CASCADE,
+  host_gamer_id INT REFERENCES gamer_profiles(id) ON DELETE SET NULL,
+  host_business_id INT REFERENCES business_profiles(id) ON DELETE SET NULL,
   tournament_name VARCHAR(100) NOT NULL,
   description TEXT,
   game_id INT REFERENCES games(id),
@@ -124,12 +132,14 @@ CREATE TABLE tournaments (
   max_players INT,
   entry_fee FLOAT DEFAULT 0,
   status VARCHAR(20) DEFAULT 'registration', -- 'registration', 'active', 'completed'
+  host_type VARCHAR(20), -- 'gamer' or 'business'
   start_date TIMESTAMP,
   end_date TIMESTAMP,
   image_url VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Tournament registrations
 CREATE TABLE tournament_registrations (

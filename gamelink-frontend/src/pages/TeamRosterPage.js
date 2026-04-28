@@ -8,19 +8,19 @@ export default function TeamRosterPage() {
   const [teamMembers, setTeamMembers] = useState([]);
 
   useEffect(() => {
+    const loadTeamRoster = async () => {
+      try {
+        const response = await businessAPI.getTeamRoster(user.id);
+        setTeamMembers(response.data);
+      } catch (error) {
+        console.error('Failed to load team roster:', error);
+      }
+    };
+
     if (user?.id) {
       loadTeamRoster();
     }
   }, [user?.id]);
-
-  const loadTeamRoster = async () => {
-    try {
-      const response = await businessAPI.getTeamRoster(user.id);
-      setTeamMembers(response.data);
-    } catch (error) {
-      console.error('Failed to load team roster:', error);
-    }
-  };
 
   return (
     <div className="team-roster-page">
