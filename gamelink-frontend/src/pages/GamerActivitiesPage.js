@@ -16,6 +16,8 @@ export default function GamerActivitiesPage() {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [activePostMenu, setActivePostMenu] = useState(null);
   const [commentEditor, setCommentEditor] = useState({ postId: null, commentId: null, content: '' });
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   const handleSaveAvatar = async (avatarUrl) => {
     if (!user) return;
@@ -51,6 +53,26 @@ export default function GamerActivitiesPage() {
       console.error('Failed to load posts:', error);
     }
   };
+
+  const loadStats = async () => {
+    if (!user) {
+      setLoadingStats(false);
+      return;
+    }
+    try {
+      setLoadingStats(true);
+      const response = await gamerAPI.getActivityStats(user.id);
+      setStats(response.data);
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStats();
+  }, [user]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -157,6 +179,21 @@ export default function GamerActivitiesPage() {
     }
   };
 
+  const statLabels = [
+    { label: 'Account active since: ', key: 'accountActiveDuration' },
+    { label: 'Total Take Ons:', key: 'totalTakeons' },
+    { label: 'Greatest Rival:', key: 'greatestRival' },
+    { label: 'Take Ons won:', key: 'takeonsWon' },
+    { label: 'Take Ons lost:', key: 'takeonsLost' },
+    { label: 'Tournaments won:', key: 'tournamentsWon' },
+    { label: 'Tournaments lost:', key: 'tournamentsLost' },
+    { label: 'Tournaments hosted:', key: 'tournamentsHosted' },
+    { label: 'Account status type:', key: 'accountStatusType' },
+    { label: 'eSports teams signed into:', key: 'esportsTeamsSigned' },
+    { label: 'Duration as signed gamer:', key: 'durationSignedGamer' },
+    { label: 'Duration as free agent:', key: 'durationFreeAgent' }
+  ];
+
   return (
     <div className="activities-page">
       <div className="topbar">
@@ -203,14 +240,14 @@ export default function GamerActivitiesPage() {
           <div className="card-header">
             <span>Posts</span>
             <button
-            className="icon-button"
-            type="button"
-            onClick={() => {
-              setShowPostForm(true);
-              setSelectedFile(null);
-              setMediaPreview(null);
-            }}
-          >
+              className="icon-button"
+              type="button"
+              onClick={() => {
+                setShowPostForm(true);
+                setSelectedFile(null);
+                setMediaPreview(null);
+              }}
+            >
               +
             </button>
           </div>
@@ -328,27 +365,25 @@ export default function GamerActivitiesPage() {
             <span>Activity Stats</span>
           </div>
           <div className="stats-list">
-            {[
-              'Account active duration:',
-              'Total Take Ons:',
-              'Greatest Rival:',
-              'Take Ons won:',
-              'Take Ons lost:',
-              'Tournaments won:',
-              'Tournaments lost:',
-              'Tournaments hosted:',
-              'Account status type:',
-              'eSports teams signed into:',
-              'Duration as signed gamer:',
-              'Duration as free agent:'
-            ].map((line) => (
-              <div key={line} className="stats-item">
-                <p>{line}</p>
+            {loadingStats ? (
+              <div className="stats-item">
+                <p>Loading stats...</p>
               </div>
-            ))}
+            ) : stats ? (
+              statLabels.map(({ label, key }) => (
+                <div key={key} className="stats-item">
+                  <p>{label} <span className="stat-value">{stats[key] || '0'}</span></p>
+                </div>
+              ))
+            ) : (
+              <div className="stats-item">
+                <p>No stats available</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

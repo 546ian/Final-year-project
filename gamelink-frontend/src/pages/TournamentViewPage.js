@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
 import { tournamentAPI } from '../utils/api';
 import TournamentBracket from '../components/TournamentBracket';
@@ -30,14 +30,14 @@ export default function TournamentViewPage() {
     
     const fetchTournament = async () => {
       try {
-        const [tourneyData, partsData] = await Promise.all([
+        const [tourneyResponse, partsResponse] = await Promise.all([
           tournamentAPI.getDetails(id),
           tournamentAPI.getParticipants(id)
         ]);
-        setTournament(tourneyData);
-        setParticipants(partsData);
+        setTournament(tourneyResponse.data);
+        setParticipants(partsResponse.data || []);
       } catch (error) {
-        console.error('Failed to fetch tournament:', error);
+        console.error('Failed to fetch tournament:', error.response?.data || error.message || error);
         setTournament(null);
       } finally {
         setLoading(false);
@@ -55,20 +55,25 @@ export default function TournamentViewPage() {
     <div className="tournament-view-page host-tournament-page">
       <div className="topbar">
         <div className="topbar-left">
-          <div className="avatar-circle business-avatar" />
+          <div className="avatar-circle" style={{ backgroundImage: user?.avatarUrl ? `url(${user.avatarUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }} />
           <div className="welcome-block">
             <p className="welcome-label">{user.account_type === 'business' ? 'Business' : 'Gamer'}</p>
-            <p className="welcome-name">{user?.username || user?.business_name}</p>
+            <p className="welcome-name">{user?.business_name || user?.username || 'Host'}</p>
           </div>
         </div>
         <div className="topbar-center">
+          <button className="top-tab" onClick={() => navigate('/profile')}>
+            Profile
+          </button>
           <button className="top-tab" onClick={() => navigate(user.account_type === 'business' ? '/business-home' : '/gamer-home')}>
             Home
           </button>
           <button className="top-tab active">Tournament</button>
         </div>
         <div className="topbar-right">
-          <img src={logo} alt="Gamelink Logo" />
+          <Link to={user.account_type === 'business' ? '/business-home' : '/gamer-home'}>
+            <img src={logo} alt="Gamelink logo" />
+          </Link>
         </div>
       </div>
 

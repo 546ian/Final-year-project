@@ -396,48 +396,6 @@
 }
 
 .tournament-bracket {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  padding: 30px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.bracket-container {
-  display: grid;
-  gap: 15px;
-  margin: 30px 0;
-}
-
-.match {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 107, 107, 0.3);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.player {
-  padding: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.vs {
-  padding: 8px;
-  background: rgba(255, 107, 107, 0.2);
-  text-align: center;
-  font-weight: bold;
-  color: #ff6b6b;
-}
-
-/* Enhanced Bracket Styles */
-.bracket-loading {
-  text-align: center;
-  padding: 2rem;
-  color: #ffbd66;
-}
-
-.tournament-bracket {
   background: rgba(11, 11, 11, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
@@ -450,11 +408,25 @@
   overflow-x: auto;
   gap: 24px;
   padding: 20px 0;
+  min-height: 320px;
 }
 
 .bracket-round {
+  position: relative;
   min-width: 280px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bracket-round::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -12px;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .round-header {
@@ -464,7 +436,7 @@
   padding: 12px;
   border-radius: 12px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -472,7 +444,7 @@
 .matches-column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .match {
@@ -480,7 +452,59 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.match:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 189, 102, 0.7);
+}
+
+.match-card {
+  padding: 14px 16px;
+}
+
+.match-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffbd66;
+  margin-bottom: 10px;
+}
+
+.match-player {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+.match-player:last-of-type {
+  border-bottom: none;
+}
+
+.match-player span {
+  font-size: 0.95rem;
+}
+
+.match-player .player-status {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.vs {
+  padding: 10px 0;
+  text-align: center;
+  font-weight: 700;
+  color: #ffbd66;
+}
+
+.bracket-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #ffbd66;
 }
 
 .match:hover {

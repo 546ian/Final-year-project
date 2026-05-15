@@ -21,8 +21,8 @@ const TournamentBracket = ({ tournamentId }) => {
     
     const fetchBracket = async () => {
       try {
-        const data = await tournamentAPI.getBracket(tournamentId);
-        setMatches(data);
+        const response = await tournamentAPI.getBracket(tournamentId);
+        setMatches(response.data || []);
       } catch (error) {
         console.error('Failed to fetch bracket:', error);
         setMatches([]);
@@ -48,35 +48,38 @@ const TournamentBracket = ({ tournamentId }) => {
   return (
     <div className="tournament-bracket">
       <h3>Tournament Bracket</h3>
-      <div className="bracket-container">
-        {roundNumbers.map(roundNum => (
-          <div key={roundNum} className="bracket-round">
-            <div className="round-header">Round {roundNum}</div>
-            <div className="matches-column">
-              {rounds[roundNum].map(match => (
-                <div key={match.id} className="match">
-                  <div className={`player ${match.player1_id ? '' : 'bye'}`}>
-                    {match.player1_name || 'TBD'}
+      {roundNumbers.length === 0 ? (
+        <div className="bracket-loading">No bracket data available yet.</div>
+      ) : (
+        <div className="bracket-container">
+          {roundNumbers.map(roundNum => (
+            <div key={roundNum} className="bracket-round">
+              <div className="round-header">Round {roundNum}</div>
+              <div className="matches-column">
+                {rounds[roundNum].map(match => (
+                  <div key={match.id} className="match">
+                    <div className="match-card">
+                      <div className="match-title">Match {match.match_number || match.id}</div>
+                      <div className={`match-player ${match.player1_id ? '' : 'bye'}`}>
+                        <span>{match.player1_name || 'TBD'}</span>
+                        <span className="player-status">{match.player1_score !== null ? match.player1_score : ''}</span>
+                      </div>
+                      <div className="vs">vs</div>
+                      <div className={`match-player ${match.player2_id ? '' : 'bye'}`}>
+                        <span>{match.player2_name || 'TBD'}</span>
+                        <span className="player-status">{match.player2_score !== null ? match.player2_score : ''}</span>
+                      </div>
+                      {match.winner_name && (
+                        <div className="player-status">Winner: {match.winner_name}</div>
+                      )}
+                    </div>
                   </div>
-                  <div className="vs">vs</div>
-                  <div className={`player ${match.player2_id ? '' : 'bye'}`}>
-                    {match.player2_name || 'TBD'}
-                  </div>
-                  {match.winner_name && (
-                    <div className="winner">Winner: {match.winner_name}</div>
-                  )}
-                  <div className="score">
-                    {match.player1_score !== null && match.player2_score !== null 
-                      ? `${match.player1_score}-${match.player2_score}`
-                      : 'Pending'
-                    }
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

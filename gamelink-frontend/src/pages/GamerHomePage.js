@@ -16,6 +16,8 @@ export default function GamerHomePage() {
   const [tournaments, setTournaments] = useState([]);
   const [registeredTournaments, setRegisteredTournaments] = useState([]);
   const [hostedTournaments, setHostedTournaments] = useState([]);
+  const [activityStats, setActivityStats] = useState(null);
+  const [teamMembership, setTeamMembership] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showRegisterAssigned, setShowRegisterAssigned] = useState(false);
   const [progressData, setProgressData] = useState([]);  
@@ -53,14 +55,16 @@ export default function GamerHomePage() {
   const loadGamerData = useCallback(async () => {
     try {
       if (user?.id) {
-        const [gamerRes, , tourRes, , progRes, regRes, hostRes] = await Promise.all([
+        const [gamerRes, , tourRes, , progRes, regRes, hostRes, activityRes, teamRes] = await Promise.all([
           gamerAPI.getProfile(user.id),
           pvpAPI.getAll(),
           tournamentAPI.getAll(),
           postAPI.getFeed(),
           gamerAPI.getProgress(user.id),
           gamerAPI.getTournaments(user.id),
-          gamerAPI.getHostedTournaments(user.id)
+          gamerAPI.getHostedTournaments(user.id),
+          gamerAPI.getActivityStats(user.id),
+          gamerAPI.getTeamMembership(user.id)
         ]);
 
         setGamerInfo(gamerRes.data);
@@ -68,6 +72,8 @@ export default function GamerHomePage() {
         setProgressData(progRes.data);
         setRegisteredTournaments(regRes.data);
         setHostedTournaments(hostRes.data);
+        setActivityStats(activityRes.data);
+        setTeamMembership(teamRes.data);
       }
     } catch (error) {
       console.error('Failed to load gamer data:', error);
@@ -112,11 +118,17 @@ export default function GamerHomePage() {
 
   if (!gamerInfo) return <LoadingScreen />;
 
+  const activeHosted = hostedTournaments.filter(t => t.status === 'active');
   const completedHosted = hostedTournaments.filter(t => t.status === 'completed');
   const completedParticipated = registeredTournaments.filter(t => t.status === 'completed');
   const activeRegistered = registeredTournaments.filter(t => t.status !== 'completed');
   const registeredIds = new Set(registeredTournaments.map(t => t.id));
   const availableTournaments = tournaments.filter(t => t.host_gamer_id !== gamerInfo.id && !registeredIds.has(t.id));
+  const signedTeamName = gamerInfo?.signed_team_name || gamerInfo?.signed_business_name || 'Not signed';
+  const signedBusinessName = gamerInfo?.signed_business_name || 'Not signed';
+  const currentAssignedTournament = activeRegistered[0]?.tournament_name || 'None';
+  const assignedTournamentsCount = activeRegistered.length;
+  const canRequestTermination = Boolean(activityStats?.accountStatusType === 'Signed agent' && signedTeamName !== 'Not signed');
 
   return (
     <div className="gamer-home">
@@ -205,10 +217,10 @@ export default function GamerHomePage() {
             <div className="card-separator" />
             <button className="tournament-action" onClick={() => navigate('/host-tournament')}>Host a tournament</button>
             <div className="tournament-item" style={{cursor: 'default'}}>Ongoing tournament</div>
-            {tournaments.filter(t => t.status === 'active').length === 0 ? (
+            {activeHosted.length === 0 ? (
               <div className="tournament-item" style={{opacity: 0.6, cursor: 'default'}}>No ongoing tournaments</div>
             ) : (
-              tournaments.filter(t => t.status === 'active').map(t => (
+              activeHosted.map(t => (
                 <button 
                   key={t.id} 
                   className="tournament-item" 
@@ -323,15 +335,21 @@ export default function GamerHomePage() {
             </div>
             <div className="card-separator" />
             <div className="team-details">
-              <p>Signed team:</p>
-              <p>Currently assigned tournament:</p>
-              <p>Assigned tournaments:</p>
-              <p>Number of teammates:</p>
-              <p>Current team accolades:</p>
-              <p>Current Team position:</p>
-              <p>Teams monitoring you:</p>
+              <p>Signed team: <span>{teamMembership?.business_name || teamMembership?.team_name || 'No signed team'}</span></p>
+              <p>Currently assigned tournament: <span>{activeRegistered[0]?.tournament_name || 'None'}</span></p>
+              <p>Assigned tournaments: <span>{activeRegistered.length}</span></p>
+              <p>Number of teammates: <span>{teamMembership?.team_size || 0}</span></p>
+              <p>Current team accolades: <span>{activityStats ? `${activityStats.tournamentsWon} wins / ${activityStats.tournamentsLost} losses` : 'N/A'}</span></p>
+              <p>Current Team position: <span>{teamMembership?.role || 'Not assigned'}</span></p>
+              <p>Teams monitoring you: <span>{activityStats?.esportsTeamsSigned ?? 0}</span></p>
             </div>
-            <button className="secondary-button outline">Request contract termination</button>
+            <button
+              className="secondary-button outline"
+              disabled={!teamMembership || teamMembership.contract_status !== 'active'}
+              title={!teamMembership || teamMembership.contract_status !== 'active' ? 'No active contract to terminate' : 'Request contract termination'}
+            >
+              Request contract termination
+            </button>
           </div>
 
           <div className="card progress-card">

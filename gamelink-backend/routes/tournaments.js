@@ -25,12 +25,25 @@ router.get('/', async (req, res) => {
 // Create tournament (business or gamer)
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { tournament_name, description, game_id, tournament_format, max_players, entry_fee, start_date, host_type = 'business' } = req.body;
-    
+    const { tournament_name, description, game_id, tournament_format, max_players, entry_fee, start_date, host_type = 'business', participants = [] } = req.body;
+
+    if (!tournament_name || !tournament_name.trim()) {
+      return res.status(400).json({ error: 'Tournament name is required' });
+    }
+    if (!tournament_format) {
+      return res.status(400).json({ error: 'Tournament format is required' });
+    }
+    if (!max_players || Number(max_players) < 2) {
+      return res.status(400).json({ error: 'Max players must be at least 2' });
+    }
+    if (!start_date) {
+      return res.status(400).json({ error: 'Start date is required' });
+    }
+
     let hostId;
     if (host_type === 'gamer') {
       const gamerResult = await pool.query('SELECT id FROM gamer_profiles WHERE user_id = $1', [req.user.id]);
-      if (gamerResult.rows.length === 0) return res.status(403).json({ error: 'No gamer profile' });
+      if (gamerResult.rows.length === 0) return res.status(403).json({ error: 'No gamer profile found for this user' });
       hostId = gamerResult.rows[0].id;
     } else {
       const businessResult = await pool.query('SELECT id FROM business_profiles WHERE user_id = $1', [req.user.id]);
@@ -38,18 +51,61 @@ router.post('/', authMiddleware, async (req, res) => {
       hostId = businessResult.rows[0].id;
     }
 
-    // Store host_type for display
+    const columns = [
+      host_type === 'gamer' ? 'host_gamer_id' : 'host_business_id',
+      'tournament_name',
+      'description',
+      'game_id',
+      'tournament_format',
+      'max_players',
+      'entry_fee',
+      'start_date',
+      'host_type'
+    ];
+    const values = [
+      hostId,
+      tournament_name,
+      description,
+      game_id,
+      tournament_format,
+      max_players,
+      entry_fee,
+      start_date,
+      host_type
+    ];
+    const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
+
     const result = await pool.query(
-      `INSERT INTO tournaments (host_gamer_id, host_business_id, tournament_name, description, game_id, tournament_format, max_players, entry_fee, start_date, host_type)
-       VALUES (CASE WHEN $9 = 'gamer' THEN $1::integer ELSE NULL END, CASE WHEN $9 != 'gamer' THEN $1::integer ELSE NULL END, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO tournaments (${columns.join(', ')})
+       VALUES (${placeholders})
        RETURNING *`,
-      [hostId, tournament_name, description, game_id, tournament_format, max_players, entry_fee, start_date, host_type]
+      values
     );
+
+    const tournamentId = result.rows[0].id;
+    const cleanedParticipants = Array.isArray(participants)
+      ? [...new Set(participants.map((name) => name.trim()).filter((name) => name))]
+      : [];
+
+    if (cleanedParticipants.length > 0) {
+      await pool.query(
+        `INSERT INTO tournament_registrations (tournament_id, gamer_id)
+         SELECT $1, gp.id
+         FROM gamer_profiles gp
+         JOIN users u ON gp.user_id = u.id
+         WHERE u.username = ANY($2::text[])
+           AND NOT EXISTS (
+             SELECT 1 FROM tournament_registrations tr
+             WHERE tr.tournament_id = $1 AND tr.gamer_id = gp.id
+           )`,
+        [tournamentId, cleanedParticipants]
+      );
+    }
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to create tournament' });
+    console.error('Create tournament error:', error);
+    res.status(500).json({ error: error.message || 'Failed to create tournament' });
   }
 });
 
@@ -87,11 +143,12 @@ router.get('/:tournamentId', async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT t.*, 
-       COALESCE(bp.business_name, gp.username) as host_name,
+       COALESCE(bp.business_name, u.username) as host_name,
        g.name as game_name
        FROM tournaments t
        LEFT JOIN business_profiles bp ON t.host_business_id = bp.id
        LEFT JOIN gamer_profiles gp ON t.host_gamer_id = gp.id
+       LEFT JOIN users u ON gp.user_id = u.id
        LEFT JOIN games g ON t.game_id = g.id
        WHERE t.id = $1`,
       [req.params.tournamentId]
@@ -103,6 +160,7 @@ router.get('/:tournamentId', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (error) {
+    console.error('Fetch tournament error:', error);
     res.status(500).json({ error: 'Failed to fetch tournament' });
   }
 });
@@ -112,15 +170,21 @@ router.get('/:tournamentId', async (req, res) => {
 router.get('/:tournamentId/participants', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT gp.*, u.email
+      `SELECT gp.id,
+              u.username,
+              u.email,
+              tr.registration_date,
+              tr.status
        FROM tournament_registrations tr
        JOIN gamer_profiles gp ON tr.gamer_id = gp.id
        JOIN users u ON gp.user_id = u.id
-       WHERE tr.tournament_id = $1`,
+       WHERE tr.tournament_id = $1
+       ORDER BY tr.registration_date ASC`,
       [req.params.tournamentId]
     );
     res.json(result.rows);
   } catch (error) {
+    console.error('Fetch participants error:', error);
     res.status(500).json({ error: 'Failed to fetch participants' });
   }
 });

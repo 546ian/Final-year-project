@@ -84,6 +84,7 @@ export default function GamerHostTournamentPage() {
         entry_fee: parseFloat(formData.entry_fee) || 0,
         start_date: `${formData.start_date}T${formData.start_time}:00`,
         host_type: "gamer",
+        participants: formData.participants.map((name) => name.trim()).filter((name) => name),
       };
       // Validate date is in the future
       const startDateTime = new Date(tournamentData.start_date);

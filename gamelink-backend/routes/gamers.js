@@ -259,6 +259,35 @@ router.get('/:userId/tournaments', authMiddleware, async (req, res) => {
   }
 });
 
+// Get the gamer's active signed team membership
+router.get('/:userId/team-membership', authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT tr.team_name,
+              bp.business_name,
+              tm.role,
+              tm.contract_status,
+              COUNT(tm2.id) AS team_size
+       FROM gamer_profiles gp
+       JOIN team_members tm ON tm.gamer_id = gp.id
+       JOIN team_rosters tr ON tm.team_roster_id = tr.id
+       JOIN business_profiles bp ON tr.business_id = bp.id
+       LEFT JOIN team_members tm2 ON tm2.team_roster_id = tr.id
+       WHERE gp.user_id = $1
+         AND tm.contract_status = 'active'
+       GROUP BY tm.id, tr.team_name, bp.business_name, tm.role, tm.contract_status, tm.joined_date
+       ORDER BY tm.joined_date DESC
+       LIMIT 1`,
+      [req.params.userId]
+    );
+
+    res.json(result.rows[0] || null);
+  } catch (error) {
+    console.error('Failed to fetch team membership:', error);
+    res.status(500).json({ error: 'Failed to fetch team membership' });
+  }
+});
+
 // Get tournaments hosted by this gamer
 router.get('/:userId/hosted-tournaments', authMiddleware, async (req, res) => {
   try {
@@ -278,4 +307,96 @@ router.get('/:userId/hosted-tournaments', authMiddleware, async (req, res) => {
   }
 });
 
+// Get comprehensive activity stats
+router.get('/:userId/activity-stats', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const gamerResult = await pool.query('SELECT id, created_at FROM gamer_profiles WHERE user_id = $1', [userId]);
+    if (gamerResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Gamer not found' });
+    }
+    const gamer = gamerResult.rows[0];
+
+    // Total takeons
+    const totalTakeonsRes = await pool.query(
+      `SELECT COUNT(*) as count FROM pvp_takeons 
+       WHERE challenger_id = $1 OR opponent_id = $1`,
+      [gamer.id]
+    );
+
+    // Greatest rival (most frequent opponent_display_name)
+    const rivalRes = await pool.query(
+      `SELECT opponent_display_name, COUNT(*) as count 
+       FROM pvp_takeons 
+       WHERE (challenger_id = $1 OR opponent_id = $1) AND opponent_display_name IS NOT NULL
+       GROUP BY opponent_display_name 
+       ORDER BY count DESC 
+       LIMIT 1`,
+      [gamer.id]
+    );
+
+    // Account status (signed or free)
+    const signedRes = await pool.query(
+      `SELECT COUNT(*) > 0 as is_signed 
+       FROM team_members tm
+       JOIN team_rosters tr ON tm.team_roster_id = tr.id
+       WHERE tm.gamer_id = $1 AND tm.contract_status = 'active'`,
+      [gamer.id]
+    );
+
+    // Tournament stats (simplified counts)
+    const tourneyRes = await pool.query(
+      `SELECT 
+        COUNT(CASE WHEN tr.status = 'won' THEN 1 END) as tournaments_won,
+        COUNT(CASE WHEN tr.status = 'eliminated' THEN 1 END) as tournaments_lost,
+        COUNT(CASE WHEN t.host_gamer_id = $1 THEN 1 END) as tournaments_hosted
+       FROM tournament_registrations tr
+       JOIN tournaments t ON tr.tournament_id = t.id
+       WHERE tr.gamer_id = $1`,
+      [gamer.id]
+    );
+
+    // Takeons won/lost (completed)
+    const takeonRes = await pool.query(
+      `SELECT 
+        COUNT(CASE WHEN status = 'completed' AND winner_id IS NOT NULL AND (winner_id = $2 OR challenger_score > opponent_score) THEN 1 END) as takeons_won,
+        COUNT(CASE WHEN status = 'completed' AND (winner_id != $2 OR challenger_score < opponent_score) THEN 1 END) as takeons_lost
+       FROM pvp_takeons 
+       WHERE (challenger_id = $1 OR opponent_id = $1) AND status = 'completed'`,
+      [gamer.id, gamer.id]
+    );
+
+    // Teams signed into (active contracts)
+    const teamsRes = await pool.query(
+      `SELECT COUNT(DISTINCT tr.id)::int as teams_count 
+       FROM team_members tm
+       JOIN team_rosters tr ON tm.team_roster_id = tr.id
+       WHERE tm.gamer_id = $1 AND tm.contract_status = 'active'`,
+      [gamer.id]
+    );
+
+    const stats = {
+      accountActiveDuration: gamer.created_at ? new Date(gamer.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A',
+      totalTakeons: parseInt(totalTakeonsRes.rows[0].count),
+      greatestRival: rivalRes.rows[0]?.opponent_display_name || 'None',
+      takeonsWon: parseInt(takeonRes.rows[0].takeons_won || 0),
+      takeonsLost: parseInt(takeonRes.rows[0].takeons_lost || 0),
+      tournamentsWon: parseInt(tourneyRes.rows[0].tournaments_won || 0),
+      tournamentsLost: parseInt(tourneyRes.rows[0].tournaments_lost || 0),
+      tournamentsHosted: parseInt(tourneyRes.rows[0].tournaments_hosted || 0),
+      accountStatusType: signedRes.rows[0].is_signed ? 'Signed agent' : 'Free agent',
+      esportsTeamsSigned: teamsRes.rows[0].teams_count || 0,
+      // Durations (approximate)
+      durationSignedGamer: 'N/A', // Would need joined_date logic
+      durationFreeAgent: 'N/A'    // Would need detailed tracking
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Activity stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch activity stats' });
+  }
+});
+
 module.exports = router;
+

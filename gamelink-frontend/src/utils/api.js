@@ -32,7 +32,9 @@ export const gamerAPI = {
   getStats: (userId) => api.get(`/gamers/${userId}/stats`),
   getProgress: (userId) => api.get(`/gamers/${userId}/progress`),
   getTournaments: (userId) => api.get(`/gamers/${userId}/tournaments`),
-  getHostedTournaments: (userId) => api.get(`/gamers/${userId}/hosted-tournaments`)
+  getHostedTournaments: (userId) => api.get(`/gamers/${userId}/hosted-tournaments`),
+  getActivityStats: (userId) => api.get(`/gamers/${userId}/activity-stats`),
+  getTeamMembership: (userId) => api.get(`/gamers/${userId}/team-membership`)
 };
 
 export const businessAPI = {
