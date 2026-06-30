@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
 import { gamerAPI, postAPI } from '../utils/api';
@@ -54,7 +54,7 @@ export default function GamerActivitiesPage() {
     }
   };
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!user) {
       setLoadingStats(false);
       return;
@@ -68,11 +68,11 @@ export default function GamerActivitiesPage() {
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadStats();
-  }, [user]);
+  }, [loadStats]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];

@@ -23,7 +23,6 @@ export default function GamerHostTournamentPage() {
     registration_open: true,
     rival_tag: "",
   });
-  const [invited_rivals, setInvitedRivals] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

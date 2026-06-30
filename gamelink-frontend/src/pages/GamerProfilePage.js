@@ -105,6 +105,14 @@ export default function GamerProfilePage() {
 
   const gamerTag = profile?.username || user?.username || profile?.email?.split('@')[0] || '';
 
+  const handleLogout = () => {
+    const confirmed = window.confirm('Are you sure you want to logout?');
+    if (confirmed) {
+      logout();
+      navigate('/login');
+    }
+  };
+
   if (!profile) {
     return <LoadingScreen />;
   }
@@ -178,6 +186,9 @@ export default function GamerProfilePage() {
                 <div className="profile-actions">
                   <button className="button-primary" onClick={() => setIsEditing(true)}>
                     Edit Profile
+                  </button>
+                  <button className="button-secondary" type="button" onClick={handleLogout}>
+                    Logout
                   </button>
                 </div>
               </div>

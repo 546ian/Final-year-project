@@ -46,6 +46,7 @@ CREATE TABLE business_profiles (
   logo_url VARCHAR(255),
   mpesa_phone VARCHAR(20),
   mpesa_paybill VARCHAR(20),
+  mpesa_till VARCHAR(20),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

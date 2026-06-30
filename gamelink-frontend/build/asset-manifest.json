@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.9aaf29e8.css",
-    "main.js": "/static/js/main.21ab3192.js",
+    "main.css": "/static/css/main.ca552a92.css",
+    "main.js": "/static/js/main.af799b50.js",
     "static/media/logo.png": "/static/media/logo.7a7af917f503c1511da2.png",
     "static/media/GL login.jpg": "/static/media/GL login.dfc36987906ece21c30d.jpg",
     "static/media/busi.jpg": "/static/media/busi.ad1257b5eabf5663bda4.jpg",
     "static/media/gamer.jpg": "/static/media/gamer.e8695a959884b8cba138.jpg",
     "index.html": "/index.html",
-    "main.9aaf29e8.css.map": "/static/css/main.9aaf29e8.css.map",
-    "main.21ab3192.js.map": "/static/js/main.21ab3192.js.map"
+    "main.ca552a92.css.map": "/static/css/main.ca552a92.css.map",
+    "main.af799b50.js.map": "/static/js/main.af799b50.js.map"
   },
   "entrypoints": [
-    "static/css/main.9aaf29e8.css",
-    "static/js/main.21ab3192.js"
+    "static/css/main.ca552a92.css",
+    "static/js/main.af799b50.js"
   ]
 }

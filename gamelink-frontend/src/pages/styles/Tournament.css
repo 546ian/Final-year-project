@@ -668,3 +668,224 @@
   color: #ffa500;
   margin-bottom: 30px;
 }
+
+/* ===== Host tournament UI polish (BusinessHostTournamentPage) ===== */
+
+/* Page background + breathing room */
+.host-tournament-page {
+  background: radial-gradient(1200px 600px at 10% 0%, rgba(255, 107, 0, 0.14) 0%, rgba(5, 5, 5, 1) 60%),
+    #050505;
+  padding: 28px 18px;
+}
+
+/* Improve top spacing for the host heading row */
+.host-heading-row {
+  margin-bottom: 18px;
+}
+
+.host-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Make buttons inside business host page consistent */
+.host-panel button {
+  font-weight: 800;
+}
+
+/* Table-like alignment for registered participants */
+.registered-items {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.registered-items li {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+/* Registered participants list area */
+.registered-list {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* Reduce visual heaviness on business panel borders */
+.host-panel {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Make fee toggle buttons visually like pills */
+.fee-toggle button {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure active toggle is visible */
+.fee-toggle button.active-toggle {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  color: #111111;
+  border-color: transparent;
+}
+
+/* Better spacing between form groups */
+.panel-section .subsection-title {
+  margin-top: 6px;
+}
+
+/* Game info panel polish */
+.game-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-search-hint {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.86rem;
+  line-height: 1.25;
+  margin-top: -6px;
+}
+
+.stage-subcard {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 14px 14px;
+  margin: 6px 0 2px;
+}
+
+
+
+/* Panels */
+.host-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.12) 100%);
+}
+
+.panel-section {
+  margin-bottom: 2px;
+}
+
+.panel-title {
+  margin-bottom: 14px;
+}
+
+/* Form controls */
+.host-panel input,
+.host-panel textarea,
+.host-panel select {
+  border-color: rgba(255, 255, 255, 0.18);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.host-panel input::placeholder,
+.host-panel textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.host-panel input:focus,
+.host-panel textarea:focus,
+.host-panel select:focus {
+  outline: none;
+  border-color: rgba(255, 189, 102, 0.85);
+  box-shadow: 0 0 0 4px rgba(255, 189, 102, 0.18);
+}
+
+.host-panel input:hover,
+.host-panel textarea:hover,
+.host-panel select:hover {
+  border-color: rgba(255, 189, 102, 0.45);
+}
+
+/* Toggle pills */
+.fee-toggle button,
+.radio-group label,
+.format-options label {
+  transition: background 160ms ease, transform 160ms ease, border-color 160ms ease;
+}
+
+.fee-toggle button:hover,
+.radio-group label:hover,
+.format-options label:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 189, 102, 0.45);
+}
+
+.fee-toggle button:focus-visible,
+.add-participants-button:focus-visible,
+.submit-tag-button:focus-visible,
+.start-tournament-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 189, 102, 0.22);
+}
+
+/* Buttons */
+.add-participants-button,
+.submit-tag-button {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  box-shadow: 0 12px 24px rgba(255, 140, 0, 0.18);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.add-participants-button:hover,
+.submit-tag-button:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.05);
+  box-shadow: 0 16px 30px rgba(255, 140, 0, 0.24);
+}
+
+.start-tournament-button {
+  background: linear-gradient(90deg, #ff6b00, #ffbd66);
+  box-shadow: 0 18px 40px rgba(255, 140, 0, 0.18);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.start-tournament-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 46px rgba(255, 140, 0, 0.26);
+}
+
+/* Registered participants */
+.registered-list {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.registered-title {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.registered-placeholder {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.registered-items li {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Better alignment on section labels */
+.subsection-title {
+  margin-top: 14px;
+  margin-bottom: 2px;
+}
+
+/* Responsive spacing */
+@media (max-width: 850px) {
+  .host-grid {
+    gap: 18px;
+  }
+
+  .host-panel {
+    padding: 18px;
+  }
+}
+

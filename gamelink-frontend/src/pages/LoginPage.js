@@ -34,15 +34,15 @@ export default function LoginPage() {
         <h2 className="login-subheading">Login</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
-<input
-            type="email"
-            placeholder="Username or email"
+          <input
+            type="text"
+            placeholder="Email or username"
             value={email}
             onChange={(e) => setEmail(e.target.value.trim())}
             required
           />
           <div className="password-field">
-<input
+            <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
               value={password}

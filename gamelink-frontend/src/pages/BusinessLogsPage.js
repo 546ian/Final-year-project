@@ -6,7 +6,8 @@ import './styles/BusinessLogs.css';
 
 export default function BusinessLogsPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [logs, setLogs] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [posts, setPosts] = useState([
@@ -32,20 +33,19 @@ export default function BusinessLogsPage() {
     try {
       // TODO: Add API call to fetch business logs
       setLogs([
-        { id: 1, label: 'Registered games', value: '7' },
-        { id: 2, label: 'Matches recorded', value: '18' },
-        { id: 3, label: 'Elapsed Minutes recorded', value: '450' },
+        { id: 1, label: 'Registered games', value: '0' },
+        { id: 2, label: 'Matches recorded', value: '0' },
+        { id: 3, label: 'Elapsed Minutes recorded', value: '0' },
         { id: 4, label: 'Payments initiated', value: '23' },
-        { id: 5, label: 'Amount of payment prompted', value: 'Ksh 120,000' },
-        { id: 6, label: 'Players visited', value: '64' },
-        { id: 7, label: 'Tournaments hosted', value: '4' },
-        { id: 8, label: 'Avg players registered for tournament', value: '14' },
-        { id: 9, label: 'Players Monitoring', value: '12' },
-        { id: 10, label: 'Signed players', value: '8' },
-        { id: 11, label: 'Tournaments won by signed players', value: '3' },
-        { id: 12, label: 'Tournaments lost by signed players', value: '1' },
-        { id: 13, label: 'Items posted', value: '18' },
-        { id: 14, label: 'View Activities', value: 'See log details' },
+        { id: 5, label: 'Amount of payment prompted', value: 'Ksh 0' },
+        { id: 6, label: 'Players visited', value: '0' },
+        { id: 7, label: 'Tournaments hosted', value: '1' },
+        { id: 8, label: 'Avg players registered for tournament', value: '0' },
+        { id: 9, label: 'Players Monitoring', value: '0' },
+        { id: 10, label: 'Signed players', value: '1' },
+        { id: 11, label: 'Tournaments won by signed players', value: '0' },
+        { id: 12, label: 'Tournaments lost by signed players', value: '0' },
+        { id: 13, label: 'Items posted', value: '2' },
       ]);
     } catch (error) {
       console.error('Failed to load logs:', error);
@@ -82,7 +82,25 @@ export default function BusinessLogsPage() {
           <button className="top-tab active" type="button">Business logs & Ads</button>
         </div>
         <div className="topbar-right">
-          <div className="topbar-avatar-placeholder">{user?.username?.charAt(0).toUpperCase() || 'B'}</div>
+          <button
+            type="button"
+            className="topbar-avatar-wrapper"
+            onClick={() => setShowAvatarMenu((prev) => !prev)}
+            aria-haspopup="true"
+            aria-expanded={showAvatarMenu}
+          >
+            <div className="topbar-avatar-placeholder">{user?.username?.charAt(0).toUpperCase() || 'B'}</div>
+          </button>
+          {showAvatarMenu && (
+            <div className="topbar-avatar-menu">
+              <button type="button" onClick={() => { setShowAvatarMenu(false); navigate('/profile'); }}>
+                Profile
+              </button>
+              <button type="button" onClick={() => { setShowAvatarMenu(false); logout(); navigate('/login'); }}>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

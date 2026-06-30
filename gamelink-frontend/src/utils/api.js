@@ -40,7 +40,16 @@ export const gamerAPI = {
 export const businessAPI = {
   getProfile: (userId) => api.get(`/businesses/${userId}`),
   updateProfile: (userId, data) => api.put(`/businesses/${userId}`, data),
-  getTeamRoster: (userId) => api.get(`/businesses/${userId}/team-roster`),
+  getTeamRoster: (userId, view = 'team') => api.get(`/businesses/${userId}/team-roster`, { params: { view } }),
+  searchPlayers: (userId, query, gamerId, view = 'all') => {
+    const params = { q: query, view };
+    if (gamerId) {
+      params.gamerId = gamerId;
+    }
+    return api.get(`/businesses/${userId}/player-search`, { params });
+  },
+  addTeamMember: (userId, gamerProfileId, action) => api.post(`/businesses/${userId}/team-roster/members`, { gamer_profile_id: gamerProfileId, action }),
+  releaseTeamMember: (userId, gamerProfileId) => api.delete(`/businesses/${userId}/team-roster/members`, { data: { gamer_profile_id: gamerProfileId } }),
   getDevices: (userId) => api.get(`/businesses/${userId}/devices`),
   addDevice: (userId, data) => api.post(`/businesses/${userId}/devices`, data)
 };

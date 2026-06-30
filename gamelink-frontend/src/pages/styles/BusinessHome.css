@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: linear-gradient(90deg, #ffffff 100%, #ff6b00 25%, #e45f19 0% );
+  background: linear-gradient(90deg, #ffffff 0%, #ff6b00 75%, #e45f19 100%);
   padding: 18px 24px;
   border-radius: 28px;
   margin-bottom: 24px;
@@ -78,6 +78,12 @@
 
 .topbar-avatar-wrapper {
   cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .topbar-avatar,
@@ -226,16 +232,298 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.result-pill {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
+.activity-empty {
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}
+
+.activity-list {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.activity-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.activity-status-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
+}
+
+.single-badge {
+  background: #ffb800;
+  color: #111;
+}
+
+.multi-badge {
+  background: #33d7ff;
+  color: #111;
+}
+
+.activity-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.92rem;
+}
+
+.activity-device-id {
+  font-weight: 700;
   color: #fff;
 }
+
+.activity-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.activity-card-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.activity-card-player {
+  font-weight: 700;
+  color: #fff;
+}
+
+.activity-card-match {
+  color: rgba(255, 255, 255, 0.9);
+  text-align: right;
+}
+
+.activity-countdown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(51, 255, 132, 0.14);
+  color: #33ff84;
+  font-weight: 700;
+  min-width: 120px;
+  text-align: center;
+}
+
+.activity-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.result-block {
+  position: relative;
+}
+
+.result-pill-button {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Align W, L, D controls neatly in one row */
+.result-pill-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.result-pill-row .result-block {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+
+.result-pill-button.win { background: #25a65f; color: #fff; }
+.result-pill-button.loss { background: #e04040; color: #fff; }
+.result-pill-button.draw { background: #ffb800; color: #111; }
+
+.result-count {
+  margin-top: 8px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+}
+
+.result-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 100%;
+  background: rgba(14, 20, 45, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+}
+
+.result-menu button {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.result-menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.activity-total {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* Business activity: clean layout for timer + clear button */
+.activity-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Timer pill */
+.activity-timer {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Place each entry's clear button below total matches */
+.activity-total + .clear-activity-button,
+.activity-total ~ .clear-activity-button {
+  align-self: flex-end;
+}
+
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.modal-field label {
+  color: #fff;
+  font-weight: 700;
+}
+
+.modal-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.activity-action-tabs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.activity-panel-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.clear-all-button,
+.clear-activity-button {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.clear-all-button:hover,
+.clear-activity-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.player-score-grid {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0 0;
+}
+
+.player-score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+.result-pill-button {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-pill-button.win { background: #25a65f; color: #fff; }
+.result-pill-button.loss { background: #e04040; color: #fff; }
+.result-pill-button.draw { background: #ffb800; color: #111; }
 
 .result-pill.win { background: #25a65f; }
 .result-pill.loss { background: #e04040; }
@@ -282,6 +570,101 @@
   margin-bottom: 18px;
 }
 
+.home-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.search-results {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-count {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 6px;
+}
+
+.search-error {
+  margin-top: 6px;
+  color: #ffb4b4;
+  font-size: 0.9rem;
+}
+
+.search-result-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.search-result-item:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.search-result-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.search-result-meta {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.signed-players-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.signed-players-header {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.signed-player-list {
+  display: grid;
+  gap: 10px;
+}
+
+.signed-player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.signed-player-role {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+}
+
 .player-entry {
   display: flex;
   align-items: center;
@@ -317,13 +700,7 @@
 .tournament-card {
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 16px;
-  border-radius: 24px;
-  background: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-  margin-bottom: 12px;
+  gap: 12px;
 }
 
 .tournament-card.muted-card {

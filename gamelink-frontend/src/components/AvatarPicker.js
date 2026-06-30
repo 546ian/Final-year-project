@@ -1,15 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './AvatarPicker.css';
 
 const isImageFile = (file) => file && file.type.startsWith('image/');
-
-const fileToDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(file);
-  });
 
 const cropAvatarImage = (imageUrl, scale, offsetX, offsetY, canvasSize = 256) =>
   new Promise((resolve, reject) => {
@@ -124,18 +116,18 @@ export default function AvatarPicker({ avatarUrl, onSave, onDelete }) {
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handleDragMove = (e) => {
+  const handleDragMove = useCallback((e) => {
     if (!isDragging) return;
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
     setPreviewOffsetX((prev) => prev + deltaX);
     setPreviewOffsetY((prev) => prev + deltaY);
     setDragStart({ x: e.clientX, y: e.clientY });
-  };
+  }, [isDragging, dragStart]);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (isDragging) {
@@ -146,7 +138,7 @@ export default function AvatarPicker({ avatarUrl, onSave, onDelete }) {
         document.removeEventListener('mouseup', handleDragEnd);
       };
     }
-  }, [isDragging, dragStart]);
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   const handleSave = async () => {
     if (!previewUrl) {

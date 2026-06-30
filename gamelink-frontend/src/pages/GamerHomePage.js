@@ -7,7 +7,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import logo from '../Assets/logo.png';
 import LoadingScreen from '../components/LoadingScreen';
 import AvatarPicker from '../components/AvatarPicker';
+
 import './styles/GamerHome.css';
+
 
 export default function GamerHomePage() {
   const navigate = useNavigate();
@@ -21,10 +23,15 @@ export default function GamerHomePage() {
   const [showHistory, setShowHistory] = useState(false);
   const [showRegisterAssigned, setShowRegisterAssigned] = useState(false);
   const [progressData, setProgressData] = useState([]);  
+
   const [series, setSeries] = useState('3');
   const [rivalName, setRivalName] = useState('');
   const [availableGames, setAvailableGames] = useState([]);
   const [selectedGameId, setSelectedGameId] = useState('');
+
+
+
+
 
   const handleSaveAvatar = async (formData) => {
     if (!user) return;
@@ -53,30 +60,64 @@ export default function GamerHomePage() {
   };
 
   const loadGamerData = useCallback(async () => {
-    try {
-      if (user?.id) {
-        const [gamerRes, , tourRes, , progRes, regRes, hostRes, activityRes, teamRes] = await Promise.all([
-          gamerAPI.getProfile(user.id),
-          pvpAPI.getAll(),
-          tournamentAPI.getAll(),
-          postAPI.getFeed(),
-          gamerAPI.getProgress(user.id),
-          gamerAPI.getTournaments(user.id),
-          gamerAPI.getHostedTournaments(user.id),
-          gamerAPI.getActivityStats(user.id),
-          gamerAPI.getTeamMembership(user.id)
-        ]);
+    if (!user?.id) return;
 
-        setGamerInfo(gamerRes.data);
-        setTournaments(tourRes.data);
-        setProgressData(progRes.data);
-        setRegisteredTournaments(regRes.data);
-        setHostedTournaments(hostRes.data);
-        setActivityStats(activityRes.data);
-        setTeamMembership(teamRes.data);
-      }
+    try {
+      const gamerRes = await gamerAPI.getProfile(user.id);
+      setGamerInfo(gamerRes.data);
     } catch (error) {
-      console.error('Failed to load gamer data:', error);
+      console.error('Failed to load gamer profile:', error);
+      return;
+    }
+
+    const results = await Promise.allSettled([
+      pvpAPI.getAll(),
+      tournamentAPI.getAll(),
+      postAPI.getFeed(),
+      gamerAPI.getProgress(user.id),
+      gamerAPI.getTournaments(user.id),
+      gamerAPI.getHostedTournaments(user.id),
+      gamerAPI.getActivityStats(user.id),
+      gamerAPI.getTeamMembership(user.id)
+    ]);
+
+    const [, tourRes, , progRes, regRes, hostRes, activityRes, teamRes] = results;
+
+    if (results[0].status === 'rejected') {
+      console.error('Failed to load PVP data:', results[0].reason);
+    }
+    if (tourRes?.status === 'fulfilled') {
+      setTournaments(tourRes.value.data);
+    } else {
+      console.error('Failed to load tournaments:', tourRes?.reason);
+    }
+    if (results[2].status === 'rejected') {
+      console.error('Failed to load feed posts:', results[2].reason);
+    }
+    if (progRes?.status === 'fulfilled') {
+      setProgressData(progRes.value.data);
+    } else {
+      console.error('Failed to load progress data:', progRes?.reason);
+    }
+    if (regRes?.status === 'fulfilled') {
+      setRegisteredTournaments(regRes.value.data);
+    } else {
+      console.error('Failed to load registered tournaments:', regRes?.reason);
+    }
+    if (hostRes?.status === 'fulfilled') {
+      setHostedTournaments(hostRes.value.data);
+    } else {
+      console.error('Failed to load hosted tournaments:', hostRes?.reason);
+    }
+    if (activityRes?.status === 'fulfilled') {
+      setActivityStats(activityRes.value.data);
+    } else {
+      console.error('Failed to load activity stats:', activityRes?.reason);
+    }
+    if (teamRes?.status === 'fulfilled') {
+      setTeamMembership(teamRes.value.data);
+    } else {
+      console.error('Failed to load team membership:', teamRes?.reason);
     }
   }, [user?.id]);
 
@@ -124,11 +165,6 @@ export default function GamerHomePage() {
   const activeRegistered = registeredTournaments.filter(t => t.status !== 'completed');
   const registeredIds = new Set(registeredTournaments.map(t => t.id));
   const availableTournaments = tournaments.filter(t => t.host_gamer_id !== gamerInfo.id && !registeredIds.has(t.id));
-  const signedTeamName = gamerInfo?.signed_team_name || gamerInfo?.signed_business_name || 'Not signed';
-  const signedBusinessName = gamerInfo?.signed_business_name || 'Not signed';
-  const currentAssignedTournament = activeRegistered[0]?.tournament_name || 'None';
-  const assignedTournamentsCount = activeRegistered.length;
-  const canRequestTermination = Boolean(activityStats?.accountStatusType === 'Signed agent' && signedTeamName !== 'Not signed');
 
   return (
     <div className="gamer-home">
@@ -163,6 +199,10 @@ export default function GamerHomePage() {
       </div>
 
       <div className="dashboard-grid">
+
+
+
+
         <div className="dashboard-column left-column">
           <div className="card pvp-card">
             <div className="card-header">
@@ -211,6 +251,8 @@ export default function GamerHomePage() {
           </div>
 
           <div className="card tournament-card">
+
+
             <div className="card-header">
               <span>Tournament</span>
             </div>
@@ -330,12 +372,13 @@ export default function GamerHomePage() {
 
         <div className="dashboard-column right-column">
           <div className="card team-card">
+
             <div className="card-header">
               <span>Team</span>
             </div>
             <div className="card-separator" />
             <div className="team-details">
-              <p>Signed team: <span>{teamMembership?.business_name || teamMembership?.team_name || 'No signed team'}</span></p>
+              <p>Signed team: <span>{ teamMembership?.team_name || 'No signed team'}</span></p>
               <p>Currently assigned tournament: <span>{activeRegistered[0]?.tournament_name || 'None'}</span></p>
               <p>Assigned tournaments: <span>{activeRegistered.length}</span></p>
               <p>Number of teammates: <span>{teamMembership?.team_size || 0}</span></p>
@@ -371,7 +414,12 @@ export default function GamerHomePage() {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }
+
+
+
 

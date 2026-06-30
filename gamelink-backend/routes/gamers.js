@@ -275,7 +275,7 @@ router.get('/:userId/team-membership', authMiddleware, async (req, res) => {
        LEFT JOIN team_members tm2 ON tm2.team_roster_id = tr.id
        WHERE gp.user_id = $1
          AND tm.contract_status = 'active'
-       GROUP BY tm.id, tr.team_name, bp.business_name, tm.role, tm.contract_status, tm.joined_date
+       GROUP BY tr.team_name, bp.business_name, tm.role, tm.contract_status
        ORDER BY tm.joined_date DESC
        LIMIT 1`,
       [req.params.userId]

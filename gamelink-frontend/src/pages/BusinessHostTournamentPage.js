@@ -150,12 +150,16 @@ export default function BusinessHostTournamentPage() {
         <section className="host-panel">
           <div className="panel-title">Game info</div>
           <div className="panel-section">
-            <input
-              type="text"
-              placeholder="Search game"
-              value={selectedGame}
-              onChange={(e) => setSelectedGame(e.target.value)}
-            />
+            <div className="game-search">
+              <input
+                type="text"
+                placeholder="Search game"
+                value={selectedGame}
+                onChange={(e) => setSelectedGame(e.target.value)}
+              />
+              <div className="game-search-hint">Tip: type a game name, then choose the format below.</div>
+            </div>
+
             <div className="subsection-title">Stage type</div>
             <div className="radio-group">
               <label>
@@ -177,9 +181,10 @@ export default function BusinessHostTournamentPage() {
                 <span>Double (groups compete separately)</span>
               </label>
             </div>
+
             {stageType === 'double' && (
-              <>
-                <div className="subsection-title">Double</div>
+              <div className="stage-subcard">
+                <div className="subsection-title">Double setup</div>
                 <div className="two-column-row">
                   <select value={groupStage} onChange={(e) => setGroupStage(e.target.value)}>
                     <option>Group A</option>
@@ -192,6 +197,7 @@ export default function BusinessHostTournamentPage() {
                     <option>Quarter Final</option>
                   </select>
                 </div>
+
                 <div className="two-column-row">
                   <select value={gamersFace} onChange={(e) => setGamersFace(e.target.value)}>
                     <option>Face 1</option>
@@ -204,6 +210,7 @@ export default function BusinessHostTournamentPage() {
                     <option>Time</option>
                   </select>
                 </div>
+
                 <div className="two-column-row">
                   <input
                     type="number"
@@ -218,9 +225,10 @@ export default function BusinessHostTournamentPage() {
                     <option>Top 4</option>
                   </select>
                 </div>
-              </>
+              </div>
             )}
-            <div className="subsection-title">Single</div>
+
+            <div className="subsection-title">Format</div>
             <div className="format-options">
               <label>
                 <input
