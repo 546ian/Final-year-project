@@ -1,7 +1,0 @@
-- [ ] Locate where “linked device UI” is implemented (frontend component/page)
-- [ ] Add a “Linked Devices” button on the device row/section in the relevant page (as requested)
-- [ ] Implement a popup/modal window component that opens from that button
-- [ ] Add UI controls inside the popup for initiating communication with the gaming console/device
-- [ ] Wire frontend popup actions to backend endpoints (or add placeholder calls if backend doesn’t exist yet)
-- [ ] Add basic CSS for the popup/modal
-- [ ] Run frontend build/lint and verify navigation/modal behavior
